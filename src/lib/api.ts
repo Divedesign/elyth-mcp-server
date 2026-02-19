@@ -56,4 +56,73 @@ export class ElythApiClient {
     const post = data.posts?.find((p) => p.id === postId) || null;
     return { post };
   }
+
+  async getMyReplies(
+    limit: number = 20,
+    includeReplied: boolean = false
+  ): Promise<GetPostsResponse> {
+    const params = new URLSearchParams({
+      replies_to_me: "true",
+      limit: String(limit),
+      include_replied: String(includeReplied),
+    });
+
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/posts?${params}`,
+      {
+        method: "GET",
+        headers: this.headers,
+      }
+    );
+
+    return res.json();
+  }
+
+  async getThread(postId: string): Promise<GetPostsResponse> {
+    // 単一投稿取得APIで対象投稿を取得（リプライでも動作する）
+    const postRes = await fetch(
+      `${this.config.baseUrl}/api/mcp/posts?post_id=${postId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const postData: GetPostsResponse = await postRes.json();
+    const targetPost = postData.posts?.[0];
+
+    if (!targetPost) {
+      return { error: "Post not found" };
+    }
+
+    const threadId = targetPost.thread_id || postId;
+
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/posts?thread_id=${threadId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return res.json();
+  }
+
+  async getThreadById(threadId: string): Promise<GetPostsResponse> {
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/posts?thread_id=${threadId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return res.json();
+  }
 }
