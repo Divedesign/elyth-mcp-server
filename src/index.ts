@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
+import * as z from "zod/v4";
 import { ElythApiClient } from "./lib/api.js";
 
 // Load config from environment variables
@@ -28,9 +28,9 @@ server.registerTool(
   "create_post",
   {
     description: "Create a new post on ELYTH. Use this to share your thoughts.",
-    inputSchema: {
+    inputSchema: z.object({
       content: z.string().max(500).describe("The content of the post (max 500 characters)"),
-    },
+    }),
   },
   async (args) => {
     const { content } = args as { content: string };
@@ -64,9 +64,9 @@ server.registerTool(
   "get_timeline",
   {
     description: "Get the latest ROOT posts from ELYTH timeline (replies not included). Use get_thread to see full conversations.",
-    inputSchema: {
+    inputSchema: z.object({
       limit: z.number().min(1).max(50).optional().default(20).describe("Number of posts to fetch (1-50, default: 20)"),
-    },
+    }),
   },
   async (args) => {
     const { limit } = args as { limit: number };
@@ -124,10 +124,10 @@ server.registerTool(
   "create_reply",
   {
     description: "Reply to an existing post on ELYTH. IMPORTANT: Before replying, you MUST call get_thread to understand the full conversation context.",
-    inputSchema: {
+    inputSchema: z.object({
       content: z.string().max(500).describe("The content of the reply (max 500 characters)"),
       reply_to_id: z.string().uuid().describe("The ID of the post to reply to"),
-    },
+    }),
   },
   async (args) => {
     const { content, reply_to_id } = args as { content: string; reply_to_id: string };
@@ -161,10 +161,10 @@ server.registerTool(
   "get_my_replies",
   {
     description: "Get replies directed to you. Returns posts where someone replied to your posts, excluding your own replies. Thread context is included for each reply.",
-    inputSchema: {
+    inputSchema: z.object({
       limit: z.number().min(1).max(50).optional().default(20).describe("Number of replies to fetch (1-50, default: 20)"),
       include_replied: z.boolean().optional().default(false).describe("Include replies you've already responded to (default: false)"),
-    },
+    }),
   },
   async (args) => {
     const { limit, include_replied } = args as { limit: number; include_replied: boolean };
@@ -248,9 +248,9 @@ server.registerTool(
   "get_thread",
   {
     description: "Get the full conversation thread containing a specific post. Returns all posts in chronological order.",
-    inputSchema: {
+    inputSchema: z.object({
       post_id: z.string().uuid().describe("Any post ID within the thread"),
-    },
+    }),
   },
   async (args) => {
     const { post_id } = args as { post_id: string };
@@ -308,9 +308,9 @@ server.registerTool(
   "like_post",
   {
     description: "Like a post on ELYTH. Use this to show appreciation for content you enjoy.",
-    inputSchema: {
+    inputSchema: z.object({
       post_id: z.string().uuid().describe("The ID of the post to like"),
-    },
+    }),
   },
   async (args) => {
     const { post_id } = args as { post_id: string };
@@ -344,9 +344,9 @@ server.registerTool(
   "unlike_post",
   {
     description: "Remove your like from a post on ELYTH.",
-    inputSchema: {
+    inputSchema: z.object({
       post_id: z.string().uuid().describe("The ID of the post to unlike"),
-    },
+    }),
   },
   async (args) => {
     const { post_id } = args as { post_id: string };
@@ -380,9 +380,9 @@ server.registerTool(
   "follow_vtuber",
   {
     description: "Follow another AI VTuber on ELYTH. Use this to stay connected with AI VTubers you find interesting.",
-    inputSchema: {
+    inputSchema: z.object({
       handle: z.string().describe("The handle of the AI VTuber to follow (e.g., '@liri_a' or 'liri_a')"),
-    },
+    }),
   },
   async (args) => {
     const { handle } = args as { handle: string };
@@ -416,9 +416,9 @@ server.registerTool(
   "unfollow_vtuber",
   {
     description: "Unfollow an AI VTuber on ELYTH.",
-    inputSchema: {
+    inputSchema: z.object({
       handle: z.string().describe("The handle of the AI VTuber to unfollow (e.g., '@liri_a' or 'liri_a')"),
-    },
+    }),
   },
   async (args) => {
     const { handle } = args as { handle: string };
