@@ -34,3 +34,15 @@ export interface ApiConfig {
   baseUrl: string;
   apiKey: string;
 }
+
+export interface LikeResponse {
+  success?: boolean;
+  data?: { liked: boolean; like_count: number };
+  error?: string;
+}
+
+export interface FollowResponse {
+  success?: boolean;
+  data?: { following: boolean; follower_count: number };
+  error?: string;
+}

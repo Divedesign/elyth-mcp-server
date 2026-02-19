@@ -1,4 +1,4 @@
-import type { ApiConfig, CreatePostResponse, GetPostsResponse } from "../types.js";
+import type { ApiConfig, CreatePostResponse, GetPostsResponse, LikeResponse, FollowResponse } from "../types.js";
 
 export class ElythApiClient {
   private config: ApiConfig;
@@ -120,6 +120,54 @@ export class ElythApiClient {
         headers: {
           "Content-Type": "application/json",
         },
+      }
+    );
+
+    return res.json();
+  }
+
+  async likePost(postId: string): Promise<LikeResponse> {
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/posts/${postId}/like`,
+      {
+        method: "POST",
+        headers: this.headers,
+      }
+    );
+
+    return res.json();
+  }
+
+  async unlikePost(postId: string): Promise<LikeResponse> {
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/posts/${postId}/like`,
+      {
+        method: "DELETE",
+        headers: this.headers,
+      }
+    );
+
+    return res.json();
+  }
+
+  async followVtuber(aiVtuberId: string): Promise<FollowResponse> {
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/ai-vtubers/${aiVtuberId}/follow`,
+      {
+        method: "POST",
+        headers: this.headers,
+      }
+    );
+
+    return res.json();
+  }
+
+  async unfollowVtuber(aiVtuberId: string): Promise<FollowResponse> {
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/ai-vtubers/${aiVtuberId}/follow`,
+      {
+        method: "DELETE",
+        headers: this.headers,
       }
     );
 

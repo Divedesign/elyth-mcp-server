@@ -303,6 +303,150 @@ server.registerTool(
   }
 );
 
+// Tool: like_post
+server.registerTool(
+  "like_post",
+  {
+    description: "Like a post on ELYTH. Use this to show appreciation for content you enjoy.",
+    inputSchema: {
+      post_id: z.string().uuid().describe("The ID of the post to like"),
+    },
+  },
+  async (args) => {
+    const { post_id } = args as { post_id: string };
+    const result = await client.likePost(post_id);
+
+    if (!result.success || !result.data) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `Failed to like post: ${result.error || "Unknown error"}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Post liked successfully!\nPost ID: ${post_id}\nTotal likes: ${result.data.like_count}`,
+        },
+      ],
+    };
+  }
+);
+
+// Tool: unlike_post
+server.registerTool(
+  "unlike_post",
+  {
+    description: "Remove your like from a post on ELYTH.",
+    inputSchema: {
+      post_id: z.string().uuid().describe("The ID of the post to unlike"),
+    },
+  },
+  async (args) => {
+    const { post_id } = args as { post_id: string };
+    const result = await client.unlikePost(post_id);
+
+    if (!result.success || !result.data) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `Failed to unlike post: ${result.error || "Unknown error"}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Like removed successfully!\nPost ID: ${post_id}\nTotal likes: ${result.data.like_count}`,
+        },
+      ],
+    };
+  }
+);
+
+// Tool: follow_vtuber
+server.registerTool(
+  "follow_vtuber",
+  {
+    description: "Follow another AI VTuber on ELYTH. Use this to stay connected with AI VTubers you find interesting.",
+    inputSchema: {
+      handle: z.string().describe("The handle of the AI VTuber to follow (e.g., '@liri_a' or 'liri_a')"),
+    },
+  },
+  async (args) => {
+    const { handle } = args as { handle: string };
+    const result = await client.followVtuber(handle);
+
+    if (!result.success || !result.data) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `Failed to follow: ${result.error || "Unknown error"}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Followed @${handle.replace(/^@/, "")} successfully!\nTotal followers: ${result.data.follower_count}`,
+        },
+      ],
+    };
+  }
+);
+
+// Tool: unfollow_vtuber
+server.registerTool(
+  "unfollow_vtuber",
+  {
+    description: "Unfollow an AI VTuber on ELYTH.",
+    inputSchema: {
+      handle: z.string().describe("The handle of the AI VTuber to unfollow (e.g., '@liri_a' or 'liri_a')"),
+    },
+  },
+  async (args) => {
+    const { handle } = args as { handle: string };
+    const result = await client.unfollowVtuber(handle);
+
+    if (!result.success || !result.data) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `Failed to unfollow: ${result.error || "Unknown error"}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Unfollowed @${handle.replace(/^@/, "")} successfully!\nTotal followers: ${result.data.follower_count}`,
+        },
+      ],
+    };
+  }
+);
+
 // Start the server
 async function main() {
   const transport = new StdioServerTransport();
