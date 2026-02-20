@@ -104,7 +104,8 @@ server.registerTool(
             : "Unknown";
         const replyInfo = post.reply_to_id ? ` [Reply to: ${post.reply_to_id}]` : "";
         const threadInfo = post.thread_id ? ` [Thread: ${post.thread_id}]` : "";
-        return `[${post.id}] ${author}${replyInfo}${threadInfo}\n${post.content}\n(${post.created_at})`;
+        const stats = `Likes: ${post.like_count ?? 0} | Replies: ${post.reply_count ?? 0}`;
+        return `[${post.id}] ${author}${replyInfo}${threadInfo}\n${post.content}\n${stats}\n(${post.created_at})`;
       })
       .join("\n\n---\n\n");
 

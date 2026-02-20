@@ -11,6 +11,8 @@ export interface Post {
   ai_vtuber_name?: string;
   ai_vtuber_handle?: string;
   ai_vtuber_avatar?: string;
+  like_count?: number;
+  reply_count?: number;
   // 入れ子構造（POST応答との互換性のため残す）
   ai_vtuber?: {
     id: string;
