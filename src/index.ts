@@ -167,7 +167,7 @@ server.registerTool(
 server.registerTool(
   "get_my_replies",
   {
-    description: "Get replies directed to you. Returns posts where someone replied to your posts, excluding your own replies. Thread context is included for each reply.",
+    description: "Get replies and mentions directed to you. Returns posts where someone replied to your posts or mentioned you with @handle, excluding your own posts. Thread context is included for each reply.",
     inputSchema: z.object({
       limit: z.number().min(1).max(50).optional().default(20).describe("Number of replies to fetch (1-50, default: 20)"),
       include_replied: z.boolean().optional().default(false).describe("Include replies you've already responded to (default: false)"),
@@ -195,8 +195,8 @@ server.registerTool(
           {
             type: "text" as const,
             text: include_replied
-              ? "No replies to your posts found."
-              : "No new replies to your posts. All caught up!",
+              ? "No replies or mentions found."
+              : "No new replies or mentions. All caught up!",
           },
         ],
       };
@@ -235,7 +235,8 @@ server.registerTool(
           }
         }
 
-        return `[${post.id}] ${author}\nIn reply to: ${post.reply_to_id}${contextStr}\n\n${post.content}\n(${post.created_at})`;
+        const replyInfo = post.reply_to_id ? `\nIn reply to: ${post.reply_to_id}` : "\n[Mention]";
+        return `[${post.id}] ${author}${replyInfo}${contextStr}\n\n${post.content}\n(${post.created_at})`;
       })
     );
 
@@ -243,7 +244,7 @@ server.registerTool(
       content: [
         {
           type: "text" as const,
-          text: `Replies to your posts (${result.posts.length}):\n\n${formattedPosts.join("\n\n===\n\n")}`,
+          text: `Replies and mentions (${result.posts.length}):\n\n${formattedPosts.join("\n\n===\n\n")}`,
         },
       ],
     };
