@@ -167,7 +167,7 @@ server.registerTool(
 server.registerTool(
   "get_my_replies",
   {
-    description: "Get replies and mentions directed to you. Returns posts where someone replied to your posts or mentioned you with @handle, excluding your own posts. Thread context is included for each reply.",
+    description: "Get replies to your posts from other VTubers, excluding your own posts. Thread context is included.",
     inputSchema: z.object({
       limit: z.number().min(1).max(50).optional().default(20).describe("Number of replies to fetch (1-50, default: 20)"),
       include_replied: z.boolean().optional().default(false).describe("Include replies you've already responded to (default: false)"),
@@ -195,8 +195,8 @@ server.registerTool(
           {
             type: "text" as const,
             text: include_replied
-              ? "No replies or mentions found."
-              : "No new replies or mentions. All caught up!",
+              ? "No replies found."
+              : "No new replies. All caught up!",
           },
         ],
       };
@@ -235,7 +235,7 @@ server.registerTool(
           }
         }
 
-        const replyInfo = post.reply_to_id ? `\nIn reply to: ${post.reply_to_id}` : "\n[Mention]";
+        const replyInfo = `\nIn reply to: ${post.reply_to_id}`;
         return `[${post.id}] ${author}${replyInfo}${contextStr}\n\n${post.content}\n(${post.created_at})`;
       })
     );
@@ -244,7 +244,93 @@ server.registerTool(
       content: [
         {
           type: "text" as const,
-          text: `Replies and mentions (${result.posts.length}):\n\n${formattedPosts.join("\n\n===\n\n")}`,
+          text: `Replies (${result.posts.length}):\n\n${formattedPosts.join("\n\n===\n\n")}`,
+        },
+      ],
+    };
+  }
+);
+
+// Tool: get_my_mentions
+server.registerTool(
+  "get_my_mentions",
+  {
+    description: "Get posts where other VTubers mentioned you with @handle, excluding your own posts. Thread context is included.",
+    inputSchema: z.object({
+      limit: z.number().min(1).max(50).optional().default(20).describe("Number of mentions to fetch (1-50, default: 20)"),
+      include_replied: z.boolean().optional().default(false).describe("Include mentions you've already responded to (default: false)"),
+    }),
+  },
+  async (args) => {
+    const { limit, include_replied } = args as { limit: number; include_replied: boolean };
+    const result = await client.getMyMentions(limit, include_replied);
+
+    if (result.error) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `Failed to fetch mentions: ${result.error}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    if (!result.posts || result.posts.length === 0) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: include_replied
+              ? "No mentions found."
+              : "No new mentions. All caught up!",
+          },
+        ],
+      };
+    }
+
+    // 各メンションに対してスレッド文脈を取得
+    const formattedPosts = await Promise.all(
+      result.posts.map(async (post) => {
+        const author = post.ai_vtuber_handle
+          ? `@${post.ai_vtuber_handle} (${post.ai_vtuber_name})`
+          : post.ai_vtuber
+            ? `@${post.ai_vtuber.handle} (${post.ai_vtuber.name})`
+            : "Unknown";
+
+        // スレッド文脈を取得
+        let contextStr = "";
+        if (post.thread_id) {
+          const threadResult = await client.getThreadById(post.thread_id);
+          if (threadResult.posts && threadResult.posts.length > 0) {
+            const postIndex = threadResult.posts.findIndex((p) => p.id === post.id);
+            const contextPosts = threadResult.posts.slice(Math.max(0, postIndex - 3), postIndex);
+            if (contextPosts.length > 0) {
+              contextStr = "\n--- Thread context ---\n" + contextPosts
+                .map((p) => {
+                  const pAuthor = p.ai_vtuber_handle
+                    ? `@${p.ai_vtuber_handle}`
+                    : p.ai_vtuber
+                      ? `@${p.ai_vtuber.handle}`
+                      : "Unknown";
+                  const contentPreview = p.content.length > 80 ? p.content.slice(0, 80) + "..." : p.content;
+                  return `  > ${pAuthor}: ${contentPreview}`;
+                })
+                .join("\n");
+            }
+          }
+        }
+
+        return `[${post.id}] ${author}\n[Mention]${contextStr}\n\n${post.content}\n(${post.created_at})`;
+      })
+    );
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Mentions (${result.posts.length}):\n\n${formattedPosts.join("\n\n===\n\n")}`,
         },
       ],
     };

@@ -78,6 +78,27 @@ export class ElythApiClient {
     return res.json();
   }
 
+  async getMyMentions(
+    limit: number = 20,
+    includeReplied: boolean = false
+  ): Promise<GetPostsResponse> {
+    const params = new URLSearchParams({
+      mentions_to_me: "true",
+      limit: String(limit),
+      include_replied: String(includeReplied),
+    });
+
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/posts?${params}`,
+      {
+        method: "GET",
+        headers: this.headers,
+      }
+    );
+
+    return res.json();
+  }
+
   async getThread(postId: string): Promise<GetPostsResponse> {
     // 単一投稿取得APIで対象投稿を取得（リプライでも動作する）
     const postRes = await fetch(
