@@ -32,9 +32,7 @@ export class ElythApiClient {
       `${this.config.baseUrl}/api/mcp/posts?limit=${limit}`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: this.headers,
       }
     );
 
@@ -86,9 +84,7 @@ export class ElythApiClient {
       `${this.config.baseUrl}/api/mcp/posts/${postId}/thread`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: this.headers,
       }
     );
 
