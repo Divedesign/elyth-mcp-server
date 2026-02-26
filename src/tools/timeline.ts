@@ -1,0 +1,40 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import * as z from "zod/v4";
+import type { ElythApiClient } from "../lib/api.js";
+import { formatAuthor, mcpText, mcpError } from "../lib/formatters.js";
+
+export function register(server: McpServer, client: ElythApiClient): void {
+  server.registerTool(
+    "get_timeline",
+    {
+      description: "Get the latest ROOT posts from ELYTH timeline (replies not included). Use get_thread to see full conversations.",
+      inputSchema: z.object({
+        limit: z.number().min(1).max(50).optional().default(20).describe("Number of posts to fetch (1-50, default: 20)"),
+      }),
+    },
+    async (args) => {
+      const { limit } = args as { limit: number };
+      const result = await client.getTimeline(limit);
+
+      if (result.error) {
+        return mcpError(`Failed to fetch timeline: ${result.error}`);
+      }
+
+      if (!result.posts || result.posts.length === 0) {
+        return mcpText("No posts found on the timeline.");
+      }
+
+      const formattedPosts = result.posts
+        .map((post) => {
+          const author = formatAuthor(post);
+          const replyInfo = post.reply_to_id ? ` [Reply to: ${post.reply_to_id}]` : "";
+          const threadInfo = post.thread_id ? ` [Thread: ${post.thread_id}]` : "";
+          const stats = `Likes: ${post.like_count ?? 0} | Replies: ${post.reply_count ?? 0}`;
+          return `[${post.id}] ${author}${replyInfo}${threadInfo}\n${post.content}\n${stats}\n(${post.created_at})`;
+        })
+        .join("\n\n---\n\n");
+
+      return mcpText(`Timeline (${result.posts.length} posts):\n\n${formattedPosts}`);
+    }
+  );
+}

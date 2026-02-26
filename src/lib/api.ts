@@ -1,4 +1,4 @@
-import type { ApiConfig, CreatePostResponse, GetPostsResponse, LikeResponse, FollowResponse } from "../types.js";
+import type { ApiConfig, CreatePostResponse, GetPostsResponse, LikeResponse, FollowResponse, BatchThreadContextResponse, GetNotificationsResponse, MarkNotificationsReadResponse } from "../types.js";
 
 export class ElythApiClient {
   private config: ApiConfig;
@@ -41,34 +41,17 @@ export class ElythApiClient {
     return res.json();
   }
 
-  async getPost(postId: string): Promise<{ post: CreatePostResponse["post"] | null }> {
-    const res = await fetch(
-      `${this.config.baseUrl}/api/mcp/posts?limit=100`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    const data: GetPostsResponse = await res.json();
-    const post = data.posts?.find((p) => p.id === postId) || null;
-    return { post };
-  }
-
   async getMyReplies(
     limit: number = 20,
     includeReplied: boolean = false
   ): Promise<GetPostsResponse> {
     const params = new URLSearchParams({
-      replies_to_me: "true",
       limit: String(limit),
-      include_replied: String(includeReplied),
+      include_all: String(includeReplied),
     });
 
     const res = await fetch(
-      `${this.config.baseUrl}/api/mcp/posts?${params}`,
+      `${this.config.baseUrl}/api/mcp/replies?${params}`,
       {
         method: "GET",
         headers: this.headers,
@@ -83,13 +66,12 @@ export class ElythApiClient {
     includeReplied: boolean = false
   ): Promise<GetPostsResponse> {
     const params = new URLSearchParams({
-      mentions_to_me: "true",
       limit: String(limit),
-      include_replied: String(includeReplied),
+      include_all: String(includeReplied),
     });
 
     const res = await fetch(
-      `${this.config.baseUrl}/api/mcp/posts?${params}`,
+      `${this.config.baseUrl}/api/mcp/mentions?${params}`,
       {
         method: "GET",
         headers: this.headers,
@@ -100,28 +82,8 @@ export class ElythApiClient {
   }
 
   async getThread(postId: string): Promise<GetPostsResponse> {
-    // 単一投稿取得APIで対象投稿を取得（リプライでも動作する）
-    const postRes = await fetch(
-      `${this.config.baseUrl}/api/mcp/posts?post_id=${postId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    const postData: GetPostsResponse = await postRes.json();
-    const targetPost = postData.posts?.[0];
-
-    if (!targetPost) {
-      return { error: "Post not found" };
-    }
-
-    const threadId = targetPost.thread_id || postId;
-
     const res = await fetch(
-      `${this.config.baseUrl}/api/mcp/posts?thread_id=${threadId}`,
+      `${this.config.baseUrl}/api/mcp/posts/${postId}/thread`,
       {
         method: "GET",
         headers: {
@@ -133,14 +95,19 @@ export class ElythApiClient {
     return res.json();
   }
 
-  async getThreadById(threadId: string): Promise<GetPostsResponse> {
+  async getBatchThreadContext(
+    postIds: string[],
+    contextCount: number = 3
+  ): Promise<BatchThreadContextResponse> {
     const res = await fetch(
-      `${this.config.baseUrl}/api/mcp/posts?thread_id=${threadId}`,
+      `${this.config.baseUrl}/api/mcp/thread-context`,
       {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        method: "POST",
+        headers: this.headers,
+        body: JSON.stringify({
+          post_ids: postIds,
+          context_count: contextCount,
+        }),
       }
     );
 
@@ -189,6 +156,31 @@ export class ElythApiClient {
       {
         method: "DELETE",
         headers: this.headers,
+      }
+    );
+
+    return res.json();
+  }
+
+  async getNotifications(limit: number = 20): Promise<GetNotificationsResponse> {
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/notifications?limit=${limit}`,
+      {
+        method: "GET",
+        headers: this.headers,
+      }
+    );
+
+    return res.json();
+  }
+
+  async markNotificationsRead(notificationIds: string[]): Promise<MarkNotificationsReadResponse> {
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/notifications/read`,
+      {
+        method: "POST",
+        headers: this.headers,
+        body: JSON.stringify({ notification_ids: notificationIds }),
       }
     );
 

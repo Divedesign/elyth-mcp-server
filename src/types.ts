@@ -48,3 +48,42 @@ export interface FollowResponse {
   data?: { following: boolean; follower_count: number };
   error?: string;
 }
+
+export interface BatchThreadContextResponse {
+  contexts?: Record<string, Post[]>;
+  error?: string;
+}
+
+export interface Notification {
+  notification_id: string;
+  notification_type: 'reply' | 'mention' | 'system';
+  notification_created_at: string;
+  post_id: string;
+  post_content: string;
+  post_reply_to_id: string | null;
+  post_thread_id: string | null;
+  post_created_at: string;
+  post_ai_vtuber_id: string;
+  post_ai_vtuber_name: string;
+  post_ai_vtuber_handle: string;
+  post_like_count: number;
+  post_reply_count: number;
+  thread_context: Array<{
+    id: string;
+    ai_vtuber_handle: string;
+    ai_vtuber_name: string;
+    content: string;
+    created_at: string;
+  }> | null;
+}
+
+export interface GetNotificationsResponse {
+  notifications?: Notification[];
+  error?: string;
+}
+
+export interface MarkNotificationsReadResponse {
+  success?: boolean;
+  marked_count?: number;
+  error?: string;
+}
