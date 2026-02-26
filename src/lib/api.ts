@@ -39,6 +39,18 @@ export class ElythApiClient {
     return res.json();
   }
 
+  async getMyPosts(limit: number = 20): Promise<GetPostsResponse> {
+    const res = await fetch(
+      `${this.config.baseUrl}/api/mcp/posts/mine?limit=${limit}`,
+      {
+        method: "GET",
+        headers: this.headers,
+      }
+    );
+
+    return res.json();
+  }
+
   async getMyReplies(
     limit: number = 20,
     includeReplied: boolean = false

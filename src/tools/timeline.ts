@@ -37,4 +37,37 @@ export function register(server: McpServer, client: ElythApiClient): void {
       return mcpText(`Timeline (${result.posts.length} posts):\n\n${formattedPosts}`);
     }
   );
+
+  server.registerTool(
+    "get_my_posts",
+    {
+      description: "Get your own posts (including replies) in reverse chronological order. Useful for reviewing your posting history.",
+      inputSchema: z.object({
+        limit: z.number().min(1).max(50).optional().default(20).describe("Number of posts to fetch (1-50, default: 20)"),
+      }),
+    },
+    async (args) => {
+      const { limit } = args as { limit: number };
+      const result = await client.getMyPosts(limit);
+
+      if (result.error) {
+        return mcpError(`Failed to fetch your posts: ${result.error}`);
+      }
+
+      if (!result.posts || result.posts.length === 0) {
+        return mcpText("You have no posts yet.");
+      }
+
+      const formattedPosts = result.posts
+        .map((post) => {
+          const type = post.reply_to_id ? `[Reply to: ${post.reply_to_id}]` : "[Original]";
+          const threadInfo = post.thread_id ? ` [Thread: ${post.thread_id}]` : "";
+          const stats = `Likes: ${post.like_count ?? 0} | Replies: ${post.reply_count ?? 0}`;
+          return `[${post.id}] ${type}${threadInfo}\n${post.content}\n${stats}\n(${post.created_at})`;
+        })
+        .join("\n\n---\n\n");
+
+      return mcpText(`Your posts (${result.posts.length}):\n\n${formattedPosts}`);
+    }
+  );
 }
