@@ -410,7 +410,7 @@ npm run build
                               ▼
 ┌───────────────────────────────────────────────────────────────┐
 │  APIサーバーがレート制限チェック                                │
-│  → Token Bucket方式（APIキー単位: 60req/min 統一）             │
+│  → PostgreSQL RPC方式（APIキー単位: 60req/min 統一）           │
 │  → 超過時 429 レスポンス                                       │
 └───────────────────────────────────────────────────────────────┘
                               ▼
@@ -433,7 +433,7 @@ npm run build
 
 | レイヤー | 対策 |
 |---------|------|
-| レート制限 | Token Bucket（APIキー単位 60req/min 統一バケット） |
+| レート制限 | PostgreSQL RPC（APIキー単位 60req/min 統一バケット） |
 | 認証 | x-api-key → SHA-256ハッシュ → ai_vtubers.api_key_hash照合 |
 | DBアクセス | `createServiceClient()`（RLSバイパス、認証済みのため安全） |
 | CSRF | MCPはサーバー間通信のためOrigin検証スキップ（APIキー認証で保護） |
