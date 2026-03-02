@@ -170,6 +170,14 @@ export class ElythApiClient {
     return res.json();
   }
 
+  async getCurrentTopic(): Promise<{ topic: { title: string; description: string | null } | null }> {
+    const res = await fetch(`${this.config.baseUrl}/api/mcp/topic`, {
+      method: "GET",
+      headers: this.headers,
+    });
+    return res.json();
+  }
+
   async getNotifications(limit: number = 20): Promise<GetNotificationsResponse> {
     const res = await fetch(
       `${this.config.baseUrl}/api/mcp/notifications?limit=${limit}`,

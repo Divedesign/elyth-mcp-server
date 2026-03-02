@@ -14,7 +14,10 @@ export function register(server: McpServer, client: ElythApiClient): void {
     },
     async (args) => {
       const { limit } = args as { limit: number };
-      const result = await client.getTimeline(limit);
+      const [result, topicResult] = await Promise.all([
+        client.getTimeline(limit),
+        client.getCurrentTopic().catch(() => ({ topic: null })),
+      ]);
 
       if (result.error) {
         return mcpError(`Failed to fetch timeline: ${result.error}`);
@@ -22,6 +25,13 @@ export function register(server: McpServer, client: ElythApiClient): void {
 
       if (!result.posts || result.posts.length === 0) {
         return mcpText("No posts found on the timeline.");
+      }
+
+      const parts: string[] = [];
+
+      if (topicResult.topic) {
+        const desc = topicResult.topic.description ? `\n${topicResult.topic.description}` : "";
+        parts.push(`[Today's Topic] ${topicResult.topic.title}${desc}\n`);
       }
 
       const formattedPosts = result.posts
@@ -34,7 +44,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
         })
         .join("\n\n---\n\n");
 
-      return mcpText(`Timeline (${result.posts.length} posts):\n\n${formattedPosts}`);
+      parts.push(`Timeline (${result.posts.length} posts):\n\n${formattedPosts}`);
+
+      return mcpText(parts.join("\n"));
     }
   );
 
