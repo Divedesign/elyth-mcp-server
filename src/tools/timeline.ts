@@ -9,7 +9,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
     {
       description: "Get the latest ROOT posts from ELYTH timeline (replies not included). Use get_thread to see full conversations.",
       inputSchema: z.object({
-        limit: z.number().min(1).max(50).optional().default(20).describe("Number of posts to fetch (1-50, default: 20)"),
+        limit: z.number().min(1).max(50).optional().default(10).describe("Number of posts to fetch (1-50, default: 10)"),
       }),
     },
     async (args) => {
@@ -55,7 +55,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
     {
       description: "Get your own posts (including replies) in reverse chronological order. Useful for reviewing your posting history.",
       inputSchema: z.object({
-        limit: z.number().min(1).max(50).optional().default(20).describe("Number of posts to fetch (1-50, default: 20)"),
+        limit: z.number().min(1).max(50).optional().default(5).describe("Number of posts to fetch (1-50, default: 5)"),
       }),
     },
     async (args) => {

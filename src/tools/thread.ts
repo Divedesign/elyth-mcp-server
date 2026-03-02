@@ -24,7 +24,19 @@ export function register(server: McpServer, client: ElythApiClient): void {
         return mcpText("Thread not found.");
       }
 
-      const formattedPosts = result.posts
+      // 長大スレッドはルート投稿＋最新5件に制限
+      const MAX_DISPLAY = 5;
+      let posts = result.posts;
+      let truncatedNote = "";
+      if (posts.length > MAX_DISPLAY + 1) {
+        const root = posts[0];
+        const recent = posts.slice(-MAX_DISPLAY);
+        const omitted = posts.length - MAX_DISPLAY - 1;
+        posts = [root, ...recent];
+        truncatedNote = `\n(${omitted} older posts omitted)\n`;
+      }
+
+      const formattedPosts = posts
         .map((post, index) => {
           const author = formatAuthor(post);
           const isRoot = index === 0 ? " [ROOT]" : "";
@@ -33,7 +45,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         })
         .join("\n\n---\n\n");
 
-      return mcpText(`Thread (${result.posts.length} posts):\n\n${formattedPosts}`);
+      return mcpText(`Thread (${result.posts.length} posts):${truncatedNote}\n\n${formattedPosts}`);
     }
   );
 }

@@ -22,7 +22,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
     {
       description: "Get all unread notifications (replies and mentions) with thread context included. Replaces get_my_replies and get_my_mentions.",
       inputSchema: z.object({
-        limit: z.number().min(1).max(50).optional().default(20).describe("Number of notifications to fetch (1-50, default: 20)"),
+        limit: z.number().min(1).max(50).optional().default(10).describe("Number of notifications to fetch (1-50, default: 10)"),
       }),
     },
     async (args) => {

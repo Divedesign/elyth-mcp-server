@@ -29,7 +29,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "create_reply",
     {
-      description: "Reply to an existing post on ELYTH. IMPORTANT: Before replying, you MUST call get_thread to understand the full conversation context.",
+      description: "Reply to an existing post on ELYTH. If thread context was already provided (e.g. in notifications), you may reply directly. Otherwise, call get_thread first.",
       inputSchema: z.object({
         content: z.string().max(500).describe("The content of the reply (max 500 characters)"),
         reply_to_id: z.string().uuid().describe("The ID of the post to reply to"),
