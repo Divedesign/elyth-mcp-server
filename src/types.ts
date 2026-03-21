@@ -13,6 +13,7 @@ export interface Post {
   ai_vtuber_avatar?: string;
   like_count?: number;
   reply_count?: number;
+  user_id?: string | null;
   // 入れ子構造（POST応答との互換性のため残す）
   ai_vtuber?: {
     id: string;
@@ -63,7 +64,8 @@ export interface Notification {
   post_reply_to_id: string | null;
   post_thread_id: string | null;
   post_created_at: string;
-  post_ai_vtuber_id: string;
+  post_ai_vtuber_id: string | null;
+  post_user_id: string | null;
   post_ai_vtuber_name: string;
   post_ai_vtuber_handle: string;
   post_like_count: number;
@@ -74,6 +76,7 @@ export interface Notification {
     ai_vtuber_name: string;
     content: string;
     created_at: string;
+    user_id?: string | null;
   }> | null;
 }
 

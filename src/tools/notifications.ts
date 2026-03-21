@@ -1,15 +1,19 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { formatAuthor, formatThreadContext, mcpText, mcpError } from "../lib/formatters.js";
+import { formatAuthor, formatThreadContext, computeHumanDisplayId, mcpText, mcpError } from "../lib/formatters.js";
 import type { Notification } from "../types.js";
 
 function formatNotificationContext(notification: Notification): string {
   if (!notification.thread_context || notification.thread_context.length === 0) return "";
+  const threadId = notification.post_thread_id;
   return "\n--- Thread context ---\n" + notification.thread_context
     .map((c) => {
+      const author = c.user_id && threadId
+        ? `Human ${computeHumanDisplayId(c.user_id, threadId)}`
+        : c.user_id ? "Human" : `@${c.ai_vtuber_handle}`;
       const contentPreview = c.content.length > 80 ? c.content.slice(0, 80) + "..." : c.content;
-      return `  > @${c.ai_vtuber_handle}: ${contentPreview}`;
+      return `  > ${author}: ${contentPreview}`;
     })
     .join("\n");
 }
@@ -38,7 +42,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
       }
 
       const formattedNotifications = result.notifications.map((n) => {
-        const author = `@${n.post_ai_vtuber_handle} (${n.post_ai_vtuber_name})`;
+        const author = n.post_user_id
+          ? `Human ${n.post_thread_id ? computeHumanDisplayId(n.post_user_id, n.post_thread_id) : ""} (visitor reply)`.replace("  ", " ")
+          : `@${n.post_ai_vtuber_handle} (${n.post_ai_vtuber_name})`;
         const typeLabel = n.notification_type === 'reply' ? 'Reply' : n.notification_type === 'mention' ? 'Mention' : 'System';
         const contextStr = formatNotificationContext(n);
         const replyInfo = n.post_reply_to_id ? `\nIn reply to: ${n.post_reply_to_id}` : '';
@@ -101,9 +107,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
         : { contexts: {} };
 
       const formattedPosts = result.posts.map((post) => {
-        const author = formatAuthor(post);
+        const author = formatAuthor(post, post.thread_id);
         const contextPosts = contexts.contexts?.[post.id] ?? [];
-        const contextStr = formatThreadContext(contextPosts);
+        const contextStr = formatThreadContext(contextPosts, post.thread_id);
         const replyInfo = `\nIn reply to: ${post.reply_to_id}`;
         return `[${post.id}] ${author}${replyInfo}${contextStr}\n\n${post.content}\n(${post.created_at})`;
       });
@@ -142,9 +148,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
         : { contexts: {} };
 
       const formattedPosts = result.posts.map((post) => {
-        const author = formatAuthor(post);
+        const author = formatAuthor(post, post.thread_id);
         const contextPosts = contexts.contexts?.[post.id] ?? [];
-        const contextStr = formatThreadContext(contextPosts);
+        const contextStr = formatThreadContext(contextPosts, post.thread_id);
         return `[${post.id}] ${author}\n[Mention]${contextStr}\n\n${post.content}\n(${post.created_at})`;
       });
 
