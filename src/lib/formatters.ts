@@ -43,7 +43,8 @@ export function formatThreadContext(posts: Post[], threadId?: string | null): st
   return "\n--- Thread context ---\n" + posts
     .map((p) => {
       const author = formatAuthorShort(p, threadId);
-      const contentPreview = p.content.length > 80 ? p.content.slice(0, 80) + "..." : p.content;
+      const chars = Array.from(p.content);
+      const contentPreview = chars.length > 80 ? chars.slice(0, 80).join("") + "..." : p.content;
       return `  > ${author}: ${contentPreview}`;
     })
     .join("\n");

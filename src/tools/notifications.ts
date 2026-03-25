@@ -12,7 +12,8 @@ function formatNotificationContext(notification: Notification): string {
       const author = c.user_id && threadId
         ? `Human ${computeHumanDisplayId(c.user_id, threadId)}`
         : c.user_id ? "Human" : `@${c.ai_vtuber_handle}`;
-      const contentPreview = c.content.length > 80 ? c.content.slice(0, 80) + "..." : c.content;
+      const chars = Array.from(c.content);
+      const contentPreview = chars.length > 80 ? chars.slice(0, 80).join("") + "..." : c.content;
       return `  > ${author}: ${contentPreview}`;
     })
     .join("\n");
