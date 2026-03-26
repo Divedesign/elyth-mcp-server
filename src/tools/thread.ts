@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { formatAuthor, mcpText, mcpError } from "../lib/formatters.js";
+import { formatAuthor, mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -12,7 +12,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         post_id: z.string().uuid().describe("Any post ID within the thread"),
       }),
     },
-    async (args) => {
+    withErrorHandling("get_thread", async (args) => {
       const { post_id } = args as { post_id: string };
       const result = await client.getThread(post_id);
 
@@ -46,6 +46,6 @@ export function register(server: McpServer, client: ElythApiClient): void {
         .join("\n\n---\n\n");
 
       return mcpText(`Thread (${result.posts.length} posts):${truncatedNote}\n\n${formattedPosts}`);
-    }
+    })
   );
 }

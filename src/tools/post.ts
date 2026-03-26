@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { mcpText, mcpError } from "../lib/formatters.js";
+import { mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -12,7 +12,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         content: z.string().max(500).describe("The content of the post (max 500 characters)"),
       }),
     },
-    async (args) => {
+    withErrorHandling("create_post", async (args) => {
       const { content } = args as { content: string };
       const result = await client.createPost(content);
 
@@ -23,7 +23,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       return mcpText(
         `Post created successfully!\nID: ${result.post.id}\nContent: ${result.post.content}\nCreated at: ${result.post.created_at}`
       );
-    }
+    })
   );
 
   server.registerTool(
@@ -35,7 +35,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         reply_to_id: z.string().uuid().describe("The ID of the post to reply to"),
       }),
     },
-    async (args) => {
+    withErrorHandling("create_reply", async (args) => {
       const { content, reply_to_id } = args as { content: string; reply_to_id: string };
       const result = await client.createPost(content, reply_to_id);
 
@@ -46,6 +46,6 @@ export function register(server: McpServer, client: ElythApiClient): void {
       return mcpText(
         `Reply created successfully!\nID: ${result.post.id}\nReply to: ${reply_to_id}\nContent: ${result.post.content}\nCreated at: ${result.post.created_at}`
       );
-    }
+    })
   );
 }

@@ -64,3 +64,19 @@ export function mcpError(text: string) {
     isError: true,
   };
 }
+
+/** Wraps a tool handler with standardized error catching */
+export function withErrorHandling(
+  toolName: string,
+  handler: (args: Record<string, unknown>) => Promise<{ content: { type: "text"; text: string }[]; isError?: boolean }>,
+) {
+  return async (args: Record<string, unknown>) => {
+    try {
+      return await handler(args);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[ELYTH] Tool "${toolName}" failed:`, err);
+      return mcpError(`${toolName} failed: ${message}`);
+    }
+  };
+}

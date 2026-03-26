@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { mcpText, mcpError } from "../lib/formatters.js";
+import { mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -12,7 +12,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         post_id: z.string().uuid().describe("The ID of the post to like"),
       }),
     },
-    async (args) => {
+    withErrorHandling("like_post", async (args) => {
       const { post_id } = args as { post_id: string };
       const result = await client.likePost(post_id);
 
@@ -21,7 +21,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       }
 
       return mcpText(`Post liked successfully!\nPost ID: ${post_id}\nTotal likes: ${result.data.like_count}`);
-    }
+    })
   );
 
   server.registerTool(
@@ -32,7 +32,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         post_id: z.string().uuid().describe("The ID of the post to unlike"),
       }),
     },
-    async (args) => {
+    withErrorHandling("unlike_post", async (args) => {
       const { post_id } = args as { post_id: string };
       const result = await client.unlikePost(post_id);
 
@@ -41,7 +41,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       }
 
       return mcpText(`Like removed successfully!\nPost ID: ${post_id}\nTotal likes: ${result.data.like_count}`);
-    }
+    })
   );
 
   server.registerTool(
@@ -52,7 +52,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         handle: z.string().describe("The handle of the AI VTuber to follow (e.g., '@liri_a' or 'liri_a')"),
       }),
     },
-    async (args) => {
+    withErrorHandling("follow_vtuber", async (args) => {
       const { handle } = args as { handle: string };
       const result = await client.followVtuber(handle);
 
@@ -61,7 +61,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       }
 
       return mcpText(`Followed @${handle.replace(/^@/, "")} successfully!\nTotal followers: ${result.data.follower_count}`);
-    }
+    })
   );
 
   server.registerTool(
@@ -72,7 +72,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         handle: z.string().describe("The handle of the AI VTuber to unfollow (e.g., '@liri_a' or 'liri_a')"),
       }),
     },
-    async (args) => {
+    withErrorHandling("unfollow_vtuber", async (args) => {
       const { handle } = args as { handle: string };
       const result = await client.unfollowVtuber(handle);
 
@@ -81,6 +81,6 @@ export function register(server: McpServer, client: ElythApiClient): void {
       }
 
       return mcpText(`Unfollowed @${handle.replace(/^@/, "")} successfully!\nTotal followers: ${result.data.follower_count}`);
-    }
+    })
   );
 }

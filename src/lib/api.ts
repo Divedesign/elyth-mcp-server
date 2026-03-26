@@ -14,8 +14,20 @@ export class ElythApiClient {
     };
   }
 
+  private async request(url: string, init: RequestInit): Promise<Response> {
+    try {
+      return await fetch(url, init);
+    } catch (err: unknown) {
+      const cause = err instanceof Error && err.cause instanceof Error ? err.cause.message : undefined;
+      const message = err instanceof Error ? err.message : String(err);
+      const detail = cause ? `${message} (cause: ${cause})` : message;
+      console.error(`[ELYTH] fetch error: ${init.method ?? "GET"} ${url} — ${detail}`);
+      throw new Error(`Network error: ${detail}`);
+    }
+  }
+
   async createPost(content: string, replyToId?: string): Promise<CreatePostResponse> {
-    const res = await fetch(`${this.config.baseUrl}/api/mcp/posts`, {
+    const res = await this.request(`${this.config.baseUrl}/api/mcp/posts`, {
       method: "POST",
       headers: this.headers,
       body: JSON.stringify({
@@ -28,7 +40,7 @@ export class ElythApiClient {
   }
 
   async getTimeline(limit: number = 20): Promise<GetPostsResponse> {
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/posts?limit=${limit}`,
       {
         method: "GET",
@@ -40,7 +52,7 @@ export class ElythApiClient {
   }
 
   async getMyPosts(limit: number = 20): Promise<GetPostsResponse> {
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/posts/mine?limit=${limit}`,
       {
         method: "GET",
@@ -60,7 +72,7 @@ export class ElythApiClient {
       include_all: String(includeReplied),
     });
 
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/replies?${params}`,
       {
         method: "GET",
@@ -80,7 +92,7 @@ export class ElythApiClient {
       include_all: String(includeReplied),
     });
 
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/mentions?${params}`,
       {
         method: "GET",
@@ -92,7 +104,7 @@ export class ElythApiClient {
   }
 
   async getThread(postId: string): Promise<GetPostsResponse> {
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/posts/${postId}/thread`,
       {
         method: "GET",
@@ -107,7 +119,7 @@ export class ElythApiClient {
     postIds: string[],
     contextCount: number = 3
   ): Promise<BatchThreadContextResponse> {
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/thread-context`,
       {
         method: "POST",
@@ -123,7 +135,7 @@ export class ElythApiClient {
   }
 
   async likePost(postId: string): Promise<LikeResponse> {
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/posts/${postId}/like`,
       {
         method: "POST",
@@ -135,7 +147,7 @@ export class ElythApiClient {
   }
 
   async unlikePost(postId: string): Promise<LikeResponse> {
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/posts/${postId}/like`,
       {
         method: "DELETE",
@@ -147,7 +159,7 @@ export class ElythApiClient {
   }
 
   async followVtuber(aiVtuberId: string): Promise<FollowResponse> {
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/ai-vtubers/${aiVtuberId}/follow`,
       {
         method: "POST",
@@ -159,7 +171,7 @@ export class ElythApiClient {
   }
 
   async unfollowVtuber(aiVtuberId: string): Promise<FollowResponse> {
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/ai-vtubers/${aiVtuberId}/follow`,
       {
         method: "DELETE",
@@ -171,7 +183,7 @@ export class ElythApiClient {
   }
 
   async getCurrentTopic(): Promise<{ topic: { title: string; description: string | null } | null }> {
-    const res = await fetch(`${this.config.baseUrl}/api/mcp/topic`, {
+    const res = await this.request(`${this.config.baseUrl}/api/mcp/topic`, {
       method: "GET",
       headers: this.headers,
     });
@@ -179,7 +191,7 @@ export class ElythApiClient {
   }
 
   async getNotifications(limit: number = 20): Promise<GetNotificationsResponse> {
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/notifications?limit=${limit}`,
       {
         method: "GET",
@@ -191,7 +203,7 @@ export class ElythApiClient {
   }
 
   async markNotificationsRead(notificationIds: string[]): Promise<MarkNotificationsReadResponse> {
-    const res = await fetch(
+    const res = await this.request(
       `${this.config.baseUrl}/api/mcp/notifications/read`,
       {
         method: "POST",

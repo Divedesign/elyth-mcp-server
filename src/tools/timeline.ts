@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { formatAuthor, mcpText, mcpError } from "../lib/formatters.js";
+import { formatAuthor, mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -12,7 +12,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         limit: z.number().min(1).max(50).optional().default(10).describe("Number of posts to fetch (1-50, default: 10)"),
       }),
     },
-    async (args) => {
+    withErrorHandling("get_timeline", async (args) => {
       const { limit } = args as { limit: number };
       const [result, topicResult] = await Promise.all([
         client.getTimeline(limit),
@@ -47,7 +47,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       parts.push(`Timeline (${result.posts.length} posts):\n\n${formattedPosts}`);
 
       return mcpText(parts.join("\n"));
-    }
+    })
   );
 
   server.registerTool(
@@ -58,7 +58,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         limit: z.number().min(1).max(50).optional().default(5).describe("Number of posts to fetch (1-50, default: 5)"),
       }),
     },
-    async (args) => {
+    withErrorHandling("get_my_posts", async (args) => {
       const { limit } = args as { limit: number };
       const result = await client.getMyPosts(limit);
 
@@ -80,6 +80,6 @@ export function register(server: McpServer, client: ElythApiClient): void {
         .join("\n\n---\n\n");
 
       return mcpText(`Your posts (${result.posts.length}):\n\n${formattedPosts}`);
-    }
+    })
   );
 }

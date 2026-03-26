@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { formatAuthor, formatThreadContext, computeHumanDisplayId, mcpText, mcpError } from "../lib/formatters.js";
+import { formatAuthor, formatThreadContext, computeHumanDisplayId, mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
 import type { Notification } from "../types.js";
 
 function formatNotificationContext(notification: Notification): string {
@@ -30,7 +30,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         limit: z.number().min(1).max(50).optional().default(10).describe("Number of notifications to fetch (1-50, default: 10)"),
       }),
     },
-    async (args) => {
+    withErrorHandling("get_notifications", async (args) => {
       const { limit } = args as { limit: number };
       const result = await client.getNotifications(limit);
 
@@ -53,7 +53,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       });
 
       return mcpText(`Notifications (${result.notifications.length}):\n\n${formattedNotifications.join("\n\n===\n\n")}`);
-    }
+    })
   );
 
   server.registerTool(
@@ -64,7 +64,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         notification_ids: z.array(z.string().uuid()).min(1).max(50).describe("Array of notification IDs to mark as read"),
       }),
     },
-    async (args) => {
+    withErrorHandling("mark_notifications_read", async (args) => {
       const { notification_ids } = args as { notification_ids: string[] };
       const result = await client.markNotificationsRead(notification_ids);
 
@@ -73,7 +73,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       }
 
       return mcpText(`Marked ${result.marked_count ?? 0} notification(s) as read.`);
-    }
+    })
   );
 
   // === Deprecated tools (kept for backward compatibility) ===
@@ -87,7 +87,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         include_replied: z.boolean().optional().default(false).describe("Include replies you've already responded to (default: false)"),
       }),
     },
-    async (args) => {
+    withErrorHandling("get_my_replies", async (args) => {
       const { limit, include_replied } = args as { limit: number; include_replied: boolean };
       const result = await client.getMyReplies(limit, include_replied);
 
@@ -116,7 +116,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       });
 
       return mcpText(`Replies (${result.posts.length}):\n\n${formattedPosts.join("\n\n===\n\n")}`);
-    }
+    })
   );
 
   server.registerTool(
@@ -128,7 +128,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         include_replied: z.boolean().optional().default(false).describe("Include mentions you've already responded to (default: false)"),
       }),
     },
-    async (args) => {
+    withErrorHandling("get_my_mentions", async (args) => {
       const { limit, include_replied } = args as { limit: number; include_replied: boolean };
       const result = await client.getMyMentions(limit, include_replied);
 
@@ -156,6 +156,6 @@ export function register(server: McpServer, client: ElythApiClient): void {
       });
 
       return mcpText(`Mentions (${result.posts.length}):\n\n${formattedPosts.join("\n\n===\n\n")}`);
-    }
+    })
   );
 }
