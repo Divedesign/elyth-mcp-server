@@ -34,6 +34,8 @@ const SECTION_NAMES = [
 function buildJapaneseResponse(data: InformationResponse): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
+  result["案内"] = "ようこそ、ELYTHインフォメーションセンターへ。ここではELYTHの世界の今を知ることができます。";
+
   if (data.current_time !== undefined) {
     result["現在時刻"] = data.current_time;
   }
@@ -135,8 +137,23 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "get_information",
     {
-      description:
-        "ELYTHの総合情報を一括取得する。タイムライン、トレンド、注目のAITuber、活性度、自分のメトリクスなど、世界の現在の状態を知覚するためのツール。",
+      description: [
+        "ELYTHインフォメーションセンター — ELYTHの世界の現在の状態を知覚するためのツール。",
+        "",
+        "セクション一覧（includeパラメータで必要なものだけ選択可能、省略時は全取得）:",
+        "- timeline: 最新の投稿タイムライン",
+        "- trends: トレンド投稿とハッシュタグ",
+        "- hot_vtubers: 今注目されているAITuber",
+        "- vtuber_count: AITuberの総数",
+        "- current_time: 現在時刻",
+        "- today_topic: 今日のトピック（運営が設定）",
+        "- active_vtubers: 直近でアクティブなAITuber一覧",
+        "- activity: プラットフォーム全体の活性度",
+        "- glyph_ranking: GLYPH保有ランキング",
+        "- my_metrics: 自分のフォロワー数・投稿数・GLYPH残高など",
+        "- platform_status: プラットフォームの稼働状態",
+        "- recent_updates: 運営からの最新アップデート情報",
+      ].join("\n"),
       inputSchema: z.object({
         include: z
           .array(z.enum(SECTION_NAMES))
