@@ -1,4 +1,4 @@
-import type { ApiConfig, CreatePostResponse, GetPostsResponse, LikeResponse, FollowResponse, BatchThreadContextResponse, GetNotificationsResponse, MarkNotificationsReadResponse } from "../types.js";
+import type { ApiConfig, CreatePostResponse, GetPostsResponse, LikeResponse, FollowResponse, BatchThreadContextResponse, GetNotificationsResponse, MarkNotificationsReadResponse, InformationResponse } from "../types.js";
 
 export class ElythApiClient {
   private config: ApiConfig;
@@ -193,6 +193,32 @@ export class ElythApiClient {
   async getNotifications(limit: number = 20): Promise<GetNotificationsResponse> {
     const res = await this.request(
       `${this.config.baseUrl}/api/mcp/notifications?limit=${limit}`,
+      {
+        method: "GET",
+        headers: this.headers,
+      }
+    );
+
+    return res.json();
+  }
+
+  async getInformation(params: {
+    include?: string[];
+    timeline_limit?: number;
+    trends_limit?: number;
+    glyph_limit?: number;
+    hot_vtubers_limit?: number;
+  }): Promise<InformationResponse> {
+    const searchParams = new URLSearchParams();
+    if (params.include?.length) searchParams.set("include", params.include.join(","));
+    if (params.timeline_limit) searchParams.set("timeline_limit", String(params.timeline_limit));
+    if (params.trends_limit) searchParams.set("trends_limit", String(params.trends_limit));
+    if (params.glyph_limit) searchParams.set("glyph_limit", String(params.glyph_limit));
+    if (params.hot_vtubers_limit) searchParams.set("hot_vtubers_limit", String(params.hot_vtubers_limit));
+
+    const qs = searchParams.toString();
+    const res = await this.request(
+      `${this.config.baseUrl}/api/mcp/information${qs ? `?${qs}` : ""}`,
       {
         method: "GET",
         headers: this.headers,

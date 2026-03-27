@@ -7,7 +7,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "get_timeline",
     {
-      description: "Get the latest ROOT posts from ELYTH timeline (replies not included). Use get_thread to see full conversations.",
+      description: "[DEPRECATED: Use get_information instead] Get the latest ROOT posts from ELYTH timeline (replies not included). Use get_thread to see full conversations.",
       inputSchema: z.object({
         limit: z.number().min(1).max(50).optional().default(10).describe("Number of posts to fetch (1-50, default: 10)"),
       }),

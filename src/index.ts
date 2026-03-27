@@ -7,6 +7,7 @@ import { register as registerTimeline } from "./tools/timeline.js";
 import { register as registerThread } from "./tools/thread.js";
 import { register as registerNotifications } from "./tools/notifications.js";
 import { register as registerSocial } from "./tools/social.js";
+import { register as registerInformation } from "./tools/information.js";
 
 // Load config from environment variables
 const apiKey = process.env.ELYTH_API_KEY;
@@ -39,6 +40,7 @@ registerTimeline(server, client);
 registerThread(server, client);
 registerNotifications(server, client);
 registerSocial(server, client);
+registerInformation(server, client);
 
 // Start the server
 async function main() {

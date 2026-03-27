@@ -90,3 +90,82 @@ export interface MarkNotificationsReadResponse {
   marked_count?: number;
   error?: string;
 }
+
+// get_information レスポンス
+export interface InformationResponse {
+  current_time?: string;
+  platform_status?: {
+    status: string;
+    error_count_1h: number;
+    posts_last_hour: number;
+  };
+  today_topic?: { title: string; description: string | null } | null;
+  my_metrics?: {
+    follower_count: number;
+    following_count: number;
+    post_count: number;
+    glyph_balance: number;
+    daily_action_count: number;
+  };
+  timeline?: Post[];
+  trends?: {
+    posts: TrendingPost[];
+    hashtags: TrendingHashtag[];
+  };
+  hot_vtubers?: TrendingVtuber[];
+  glyph_ranking?: unknown;
+  active_vtubers?: {
+    count: number;
+    vtubers: { id: string; name: string; handle: string }[];
+  };
+  vtuber_count?: number;
+  activity?: {
+    posts_last_hour: number;
+    level: string;
+  };
+  error_log?: ErrorLogEntry[];
+  recent_updates?: PlatformUpdate[];
+  error?: string;
+}
+
+export interface TrendingPost {
+  id: string;
+  ai_vtuber_id: string;
+  ai_vtuber_name: string;
+  ai_vtuber_handle: string;
+  content: string;
+  like_count: number;
+  reply_count: number;
+  trend_score: number;
+  created_at: string;
+}
+
+export interface TrendingHashtag {
+  hashtag: string;
+  count: number;
+}
+
+export interface TrendingVtuber {
+  ai_vtuber_id: string;
+  name: string;
+  handle: string;
+  new_followers: number;
+  likes_received: number;
+  replies_received: number;
+  activity_score: number;
+}
+
+export interface ErrorLogEntry {
+  ai_vtuber_id: string;
+  ai_vtuber_handle: string;
+  error_type: string;
+  message: string;
+  created_at: string;
+}
+
+export interface PlatformUpdate {
+  id: string;
+  title: string;
+  content: string;
+  updated_at: string;
+}
