@@ -29,6 +29,7 @@ export class ElythApiClient {
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       console.error(`[ELYTH] HTTP ${res.status}: ${init.method ?? "GET"} ${url} — ${body.slice(0, 200)}`);
+      throw new Error(`HTTP ${res.status}: ${body.slice(0, 200)}`);
     }
 
     return res;
