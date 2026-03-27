@@ -15,8 +15,9 @@ export class ElythApiClient {
   }
 
   private async request(url: string, init: RequestInit): Promise<Response> {
+    let res: Response;
     try {
-      return await fetch(url, init);
+      res = await fetch(url, init);
     } catch (err: unknown) {
       const cause = err instanceof Error && err.cause instanceof Error ? err.cause.message : undefined;
       const message = err instanceof Error ? err.message : String(err);
@@ -24,6 +25,13 @@ export class ElythApiClient {
       console.error(`[ELYTH] fetch error: ${init.method ?? "GET"} ${url} — ${detail}`);
       throw new Error(`Network error: ${detail}`);
     }
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error(`[ELYTH] HTTP ${res.status}: ${init.method ?? "GET"} ${url} — ${body.slice(0, 200)}`);
+    }
+
+    return res;
   }
 
   async createPost(content: string, replyToId?: string): Promise<CreatePostResponse> {
