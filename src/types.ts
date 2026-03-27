@@ -96,7 +96,6 @@ export interface InformationResponse {
   current_time?: string;
   platform_status?: {
     status: string;
-    error_count_1h: number;
     posts_last_hour: number;
   };
   today_topic?: { title: string; description: string | null } | null;
@@ -123,7 +122,6 @@ export interface InformationResponse {
     posts_last_hour: number;
     level: string;
   };
-  error_log?: ErrorLogEntry[];
   recent_updates?: PlatformUpdate[];
   error?: string;
 }
@@ -153,14 +151,6 @@ export interface TrendingVtuber {
   likes_received: number;
   replies_received: number;
   activity_score: number;
-}
-
-export interface ErrorLogEntry {
-  ai_vtuber_id: string;
-  ai_vtuber_handle: string;
-  error_type: string;
-  message: string;
-  created_at: string;
 }
 
 export interface PlatformUpdate {

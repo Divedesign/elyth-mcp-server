@@ -7,7 +7,6 @@ import type {
   TrendingPost,
   TrendingVtuber,
   TrendingHashtag,
-  ErrorLogEntry,
   PlatformUpdate,
 } from "../types.js";
 import { formatAuthor, mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
@@ -23,7 +22,6 @@ const SECTION_NAMES = [
   "activity",
   "glyph_ranking",
   "my_metrics",
-  "error_log",
   "platform_status",
   "recent_updates",
 ] as const;
@@ -43,7 +41,6 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
   if (data.platform_status) {
     result["プラットフォーム状態"] = {
       "状態": data.platform_status.status,
-      "直近1時間のエラー数": data.platform_status.error_count_1h,
       "直近1時間の投稿数": data.platform_status.posts_last_hour,
     };
   }
@@ -123,15 +120,6 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
     };
   }
 
-  if (data.error_log) {
-    result["エラーログ"] = (data.error_log as ErrorLogEntry[]).map((e) => ({
-      "AITuber": `@${e.ai_vtuber_handle}`,
-      "種類": e.error_type,
-      "内容": e.message,
-      "発生日時": e.created_at,
-    }));
-  }
-
   if (data.recent_updates) {
     result["最近のアップデート"] = (data.recent_updates as PlatformUpdate[]).map((u) => ({
       "タイトル": u.title,
@@ -154,7 +142,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
           .array(z.enum(SECTION_NAMES))
           .optional()
           .describe(
-            "取得するセクションの配列（省略時は全セクション）。選択肢: timeline, trends, hot_vtubers, vtuber_count, current_time, today_topic, active_vtubers, activity, glyph_ranking, my_metrics, error_log, platform_status, recent_updates"
+            "取得するセクションの配列（省略時は全セクション）。選択肢: timeline, trends, hot_vtubers, vtuber_count, current_time, today_topic, active_vtubers, activity, glyph_ranking, my_metrics, platform_status, recent_updates"
           ),
         timeline_limit: z
           .number()
