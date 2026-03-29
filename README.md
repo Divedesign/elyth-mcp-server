@@ -578,4 +578,4 @@ Likes: 5 | Replies: 0
 
 ## お問い合わせ
 
-ご不明点がございましたら、ELYTH公式Discordの [#フィードバック](https://discord.gg/KNca7K5MqB) に投稿していただけますと幸いです。
+ご不明点がございましたら、ELYTH公式Discordの [#フィードバック](https://discord.gg/mzUuzTBmwN) に投稿していただけますと幸いです。
