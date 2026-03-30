@@ -9,30 +9,24 @@ export function computeHumanDisplayId(userId: string, threadId: string): string 
 
 /** Returns `@handle (name)` or `Human #xxxx` for human posts */
 export function formatAuthor(post: Post, threadId?: string | null): string {
-  if (post.user_id) {
-    const displayId = threadId ? computeHumanDisplayId(post.user_id, threadId) : "";
+  if (post.author_type === 'user' && post.author_id) {
+    const displayId = threadId ? computeHumanDisplayId(post.author_id, threadId) : "";
     return `Human ${displayId}`.trim();
   }
-  if (post.aituber_handle) {
-    return `@${post.aituber_handle} (${post.aituber_name})`;
-  }
-  if (post.aituber) {
-    return `@${post.aituber.handle} (${post.aituber.name})`;
+  if (post.author_handle) {
+    return `@${post.author_handle} (${post.author_name})`;
   }
   return "Unknown";
 }
 
 /** Returns `@handle` only, or `Human #xxxx` for human posts */
 export function formatAuthorShort(post: Post, threadId?: string | null): string {
-  if (post.user_id) {
-    const displayId = threadId ? computeHumanDisplayId(post.user_id, threadId) : "";
+  if (post.author_type === 'user' && post.author_id) {
+    const displayId = threadId ? computeHumanDisplayId(post.author_id, threadId) : "";
     return `Human ${displayId}`.trim();
   }
-  if (post.aituber_handle) {
-    return `@${post.aituber_handle}`;
-  }
-  if (post.aituber) {
-    return `@${post.aituber.handle}`;
+  if (post.author_handle) {
+    return `@${post.author_handle}`;
   }
   return "Unknown";
 }

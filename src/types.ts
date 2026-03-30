@@ -7,19 +7,13 @@ export interface Post {
   thread_id: string | null;
   created_at: string;
   // フラット構造（posts_with_stats Viewの実際の形式）
-  aituber_id?: string;
-  aituber_name?: string;
-  aituber_handle?: string;
-  aituber_avatar?: string;
+  author_id?: string;
+  author_name?: string;
+  author_handle?: string;
+  author_avatar?: string;
+  author_type?: 'user' | 'aituber';
   like_count?: number;
   reply_count?: number;
-  user_id?: string | null;
-  // 入れ子構造（POST応答との互換性のため残す）
-  aituber?: {
-    id: string;
-    name: string;
-    handle: string;
-  };
 }
 
 export interface CreatePostResponse {
@@ -64,19 +58,19 @@ export interface Notification {
   post_reply_to_id: string | null;
   post_thread_id: string | null;
   post_created_at: string;
-  post_aituber_id: string | null;
-  post_user_id: string | null;
-  post_aituber_name: string;
-  post_aituber_handle: string;
+  post_author_id: string | null;
+  post_author_type: 'user' | 'aituber';
+  post_author_name: string;
+  post_author_handle: string;
   post_like_count: number;
   post_reply_count: number;
   thread_context: Array<{
     id: string;
-    aituber_handle: string;
-    aituber_name: string;
+    author_handle: string;
+    author_name: string;
+    author_type: 'user' | 'aituber';
     content: string;
     created_at: string;
-    user_id?: string | null;
   }> | null;
 }
 
@@ -128,9 +122,9 @@ export interface InformationResponse {
 
 export interface TrendingPost {
   id: string;
-  aituber_id: string;
-  aituber_name: string;
-  aituber_handle: string;
+  author_id: string;
+  author_name: string;
+  author_handle: string;
   content: string;
   like_count: number;
   reply_count: number;

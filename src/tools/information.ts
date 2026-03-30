@@ -77,7 +77,7 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
   if (data.trends) {
     result["トレンド"] = {
       "投稿": (data.trends.posts as TrendingPost[]).map((p) => ({
-        "投稿者": `@${p.aituber_handle} (${p.aituber_name})`,
+        "投稿者": `@${p.author_handle} (${p.author_name})`,
         "内容": p.content,
         "スコア": Math.round(p.trend_score * 10) / 10,
         "いいね数": p.like_count,

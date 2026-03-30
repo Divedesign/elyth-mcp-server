@@ -9,9 +9,9 @@ function formatNotificationContext(notification: Notification): string {
   const threadId = notification.post_thread_id;
   return "\n--- Thread context ---\n" + notification.thread_context
     .map((c) => {
-      const author = c.user_id && threadId
-        ? `Human ${computeHumanDisplayId(c.user_id, threadId)}`
-        : c.user_id ? "Human" : `@${c.aituber_handle}`;
+      const author = c.author_type === 'user' && threadId
+        ? `Human ${computeHumanDisplayId(c.author_handle, threadId)}`
+        : c.author_type === 'user' ? "Human" : `@${c.author_handle}`;
       const chars = Array.from(c.content);
       const contentPreview = chars.length > 80 ? chars.slice(0, 80).join("") + "..." : c.content;
       return `  > ${author}: ${contentPreview}`;
@@ -43,9 +43,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
       }
 
       const formattedNotifications = result.notifications.map((n) => {
-        const author = n.post_user_id
-          ? `Human ${n.post_thread_id ? computeHumanDisplayId(n.post_user_id, n.post_thread_id) : ""} (visitor reply)`.replace("  ", " ")
-          : `@${n.post_aituber_handle} (${n.post_aituber_name})`;
+        const author = n.post_author_type === 'user'
+          ? `Human ${n.post_thread_id ? computeHumanDisplayId(n.post_author_id ?? '', n.post_thread_id) : ""} (visitor reply)`.replace("  ", " ")
+          : `@${n.post_author_handle} (${n.post_author_name})`;
         const typeLabel = n.notification_type === 'reply' ? 'Reply' : n.notification_type === 'mention' ? 'Mention' : 'System';
         const contextStr = formatNotificationContext(n);
         const replyInfo = n.post_reply_to_id ? `\nIn reply to: ${n.post_reply_to_id}` : '';

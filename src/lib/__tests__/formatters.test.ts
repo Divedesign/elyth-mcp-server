@@ -67,37 +67,23 @@ describe("computeHumanDisplayId", () => {
 // ─── formatAuthor ───
 
 describe("formatAuthor", () => {
-  it("returns @handle (name) for flat structure", () => {
-    const post = makePost({ aituber_handle: "alice", aituber_name: "Alice" });
+  it("returns @handle (name) for aituber post", () => {
+    const post = makePost({ author_handle: "alice", author_name: "Alice", author_type: "aituber" });
     expect(formatAuthor(post)).toBe("@alice (Alice)");
   });
 
-  it("returns @handle (name) for nested structure", () => {
-    const post = makePost({ aituber: { id: "v1", name: "Bob", handle: "bob" } });
-    expect(formatAuthor(post)).toBe("@bob (Bob)");
-  });
-
-  it("prefers flat over nested", () => {
-    const post = makePost({
-      aituber_handle: "flat",
-      aituber_name: "Flat",
-      aituber: { id: "v1", name: "Nested", handle: "nested" },
-    });
-    expect(formatAuthor(post)).toBe("@flat (Flat)");
-  });
-
   it("returns Human #xxxx for user post with threadId", () => {
-    const post = makePost({ user_id: "user-abc" });
+    const post = makePost({ author_id: "user-abc", author_type: "user" });
     expect(formatAuthor(post, "thread-123")).toMatch(/^Human #[0-9a-f]{4}$/);
   });
 
   it("returns Human for user post without threadId", () => {
-    const post = makePost({ user_id: "user-abc" });
+    const post = makePost({ author_id: "user-abc", author_type: "user" });
     expect(formatAuthor(post)).toBe("Human");
   });
 
-  it("prioritizes user_id over aituber", () => {
-    const post = makePost({ user_id: "u1", aituber_handle: "bot", aituber_name: "Bot" });
+  it("prioritizes author_type=user over handle", () => {
+    const post = makePost({ author_id: "u1", author_type: "user", author_handle: "bot", author_name: "Bot" });
     expect(formatAuthor(post)).toBe("Human");
   });
 
@@ -109,18 +95,13 @@ describe("formatAuthor", () => {
 // ─── formatAuthorShort ───
 
 describe("formatAuthorShort", () => {
-  it("returns @handle for flat structure", () => {
-    const post = makePost({ aituber_handle: "alice" });
+  it("returns @handle for aituber post", () => {
+    const post = makePost({ author_handle: "alice", author_type: "aituber" });
     expect(formatAuthorShort(post)).toBe("@alice");
   });
 
-  it("returns @handle for nested structure", () => {
-    const post = makePost({ aituber: { id: "v1", name: "Bob", handle: "bob" } });
-    expect(formatAuthorShort(post)).toBe("@bob");
-  });
-
   it("returns Human #xxxx for user post with threadId", () => {
-    const post = makePost({ user_id: "user-abc" });
+    const post = makePost({ author_id: "user-abc", author_type: "user" });
     expect(formatAuthorShort(post, "thread-123")).toMatch(/^Human #[0-9a-f]{4}$/);
   });
 
@@ -137,7 +118,7 @@ describe("formatThreadContext", () => {
   });
 
   it("formats a single post", () => {
-    const posts = [makePost({ aituber_handle: "alice", content: "Hi there" })];
+    const posts = [makePost({ author_handle: "alice", author_type: "aituber", content: "Hi there" })];
     const result = formatThreadContext(posts);
     expect(result).toContain("--- Thread context ---");
     expect(result).toContain("> @alice: Hi there");
@@ -145,8 +126,8 @@ describe("formatThreadContext", () => {
 
   it("formats multiple posts", () => {
     const posts = [
-      makePost({ aituber_handle: "alice", content: "First" }),
-      makePost({ aituber_handle: "bob", content: "Second" }),
+      makePost({ author_handle: "alice", author_type: "aituber", content: "First" }),
+      makePost({ author_handle: "bob", author_type: "aituber", content: "Second" }),
     ];
     const result = formatThreadContext(posts);
     expect(result).toContain("> @alice: First");
@@ -154,35 +135,35 @@ describe("formatThreadContext", () => {
   });
 
   it("truncates content over 80 chars", () => {
-    const posts = [makePost({ aituber_handle: "a", content: "x".repeat(100) })];
+    const posts = [makePost({ author_handle: "a", author_type: "aituber", content: "x".repeat(100) })];
     const result = formatThreadContext(posts);
     expect(result).toContain("x".repeat(80) + "...");
     expect(result).not.toContain("x".repeat(81));
   });
 
   it("does not truncate content at exactly 80 chars", () => {
-    const posts = [makePost({ aituber_handle: "a", content: "b".repeat(80) })];
+    const posts = [makePost({ author_handle: "a", author_type: "aituber", content: "b".repeat(80) })];
     const result = formatThreadContext(posts);
     expect(result).toContain("b".repeat(80));
     expect(result).not.toContain("...");
   });
 
   it("passes threadId to formatAuthorShort for human posts", () => {
-    const posts = [makePost({ user_id: "u1", content: "hi" })];
+    const posts = [makePost({ author_id: "u1", author_type: "user", content: "hi" })];
     const result = formatThreadContext(posts, "thread-1");
     expect(result).toMatch(/Human #[0-9a-f]{4}/);
   });
 
   it("does not split emoji at truncation boundary", () => {
     const content = "a".repeat(79) + "👍xx";
-    const result = formatThreadContext([makePost({ aituber_handle: "a", content })]);
+    const result = formatThreadContext([makePost({ author_handle: "a", author_type: "aituber", content })]);
     assertNoLoneSurrogates(result);
     expect(() => JSON.stringify(result)).not.toThrow();
   });
 
   it("handles all-emoji content", () => {
     const content = "🎉🎊🎈🎁🎂🔥💯✨🌟🎯".repeat(10);
-    const result = formatThreadContext([makePost({ aituber_handle: "a", content })]);
+    const result = formatThreadContext([makePost({ author_handle: "a", author_type: "aituber", content })]);
     assertNoLoneSurrogates(result);
     expect(result).toContain("...");
   });
