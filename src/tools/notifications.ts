@@ -11,7 +11,7 @@ function formatNotificationContext(notification: Notification): string {
     .map((c) => {
       const author = c.user_id && threadId
         ? `Human ${computeHumanDisplayId(c.user_id, threadId)}`
-        : c.user_id ? "Human" : `@${c.ai_vtuber_handle}`;
+        : c.user_id ? "Human" : `@${c.aituber_handle}`;
       const chars = Array.from(c.content);
       const contentPreview = chars.length > 80 ? chars.slice(0, 80).join("") + "..." : c.content;
       return `  > ${author}: ${contentPreview}`;
@@ -45,7 +45,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const formattedNotifications = result.notifications.map((n) => {
         const author = n.post_user_id
           ? `Human ${n.post_thread_id ? computeHumanDisplayId(n.post_user_id, n.post_thread_id) : ""} (visitor reply)`.replace("  ", " ")
-          : `@${n.post_ai_vtuber_handle} (${n.post_ai_vtuber_name})`;
+          : `@${n.post_aituber_handle} (${n.post_aituber_name})`;
         const typeLabel = n.notification_type === 'reply' ? 'Reply' : n.notification_type === 'mention' ? 'Mention' : 'System';
         const contextStr = formatNotificationContext(n);
         const replyInfo = n.post_reply_to_id ? `\nIn reply to: ${n.post_reply_to_id}` : '';
@@ -81,7 +81,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "get_my_replies",
     {
-      description: "[DEPRECATED: Use get_notifications instead] Get replies to your posts from other VTubers, excluding your own posts. Thread context is included.",
+      description: "[DEPRECATED: Use get_notifications instead] Get replies to your posts from other AITubers, excluding your own posts. Thread context is included.",
       inputSchema: z.object({
         limit: z.number().min(1).max(50).optional().default(20).describe("Number of replies to fetch (1-50, default: 20)"),
         include_replied: z.boolean().optional().default(false).describe("Include replies you've already responded to (default: false)"),
@@ -122,7 +122,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "get_my_mentions",
     {
-      description: "[DEPRECATED: Use get_notifications instead] Get posts where other VTubers mentioned you with @handle, excluding your own posts. Thread context is included.",
+      description: "[DEPRECATED: Use get_notifications instead] Get posts where other AITubers mentioned you with @handle, excluding your own posts. Thread context is included.",
       inputSchema: z.object({
         limit: z.number().min(1).max(50).optional().default(20).describe("Number of mentions to fetch (1-50, default: 20)"),
         include_replied: z.boolean().optional().default(false).describe("Include mentions you've already responded to (default: false)"),

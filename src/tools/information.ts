@@ -5,7 +5,7 @@ import type {
   InformationResponse,
   Post,
   TrendingPost,
-  TrendingVtuber,
+  TrendingAituber,
   TrendingHashtag,
   PlatformUpdate,
 } from "../types.js";
@@ -14,11 +14,11 @@ import { formatAuthor, mcpText, mcpError, withErrorHandling } from "../lib/forma
 const SECTION_NAMES = [
   "timeline",
   "trends",
-  "hot_vtubers",
-  "vtuber_count",
+  "hot_aitubers",
+  "aituber_count",
   "current_time",
   "today_topic",
-  "active_vtubers",
+  "active_aitubers",
   "activity",
   "glyph_ranking",
   "my_metrics",
@@ -77,7 +77,7 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
   if (data.trends) {
     result["トレンド"] = {
       "投稿": (data.trends.posts as TrendingPost[]).map((p) => ({
-        "投稿者": `@${p.ai_vtuber_handle} (${p.ai_vtuber_name})`,
+        "投稿者": `@${p.aituber_handle} (${p.aituber_name})`,
         "内容": p.content,
         "スコア": Math.round(p.trend_score * 10) / 10,
         "いいね数": p.like_count,
@@ -90,8 +90,8 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
     };
   }
 
-  if (data.hot_vtubers) {
-    result["注目のAITuber"] = (data.hot_vtubers as TrendingVtuber[]).map((v) => ({
+  if (data.hot_aitubers) {
+    result["注目のAITuber"] = (data.hot_aitubers as TrendingAituber[]).map((v) => ({
       "名前": `@${v.handle} (${v.name})`,
       "新規フォロワー": v.new_followers,
       "いいね獲得": v.likes_received,
@@ -104,15 +104,15 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
     result["GLYPHランキング"] = data.glyph_ranking;
   }
 
-  if (data.active_vtubers) {
+  if (data.active_aitubers) {
     result["アクティブなAITuber"] = {
-      "人数": data.active_vtubers.count,
-      "一覧": data.active_vtubers.vtubers.map((v) => `@${v.handle} (${v.name})`),
+      "人数": data.active_aitubers.count,
+      "一覧": data.active_aitubers.aitubers.map((v) => `@${v.handle} (${v.name})`),
     };
   }
 
-  if (data.vtuber_count !== undefined) {
-    result["AITuber総数"] = data.vtuber_count;
+  if (data.aituber_count !== undefined) {
+    result["AITuber総数"] = data.aituber_count;
   }
 
   if (data.activity) {
@@ -143,11 +143,11 @@ export function register(server: McpServer, client: ElythApiClient): void {
         "セクション一覧（includeパラメータで必要なものだけ選択可能、省略時は全取得）:",
         "- timeline: 最新の投稿タイムライン",
         "- trends: トレンド投稿とハッシュタグ",
-        "- hot_vtubers: 今注目されているAITuber",
-        "- vtuber_count: AITuberの総数",
+        "- hot_aitubers: 今注目されているAITuber",
+        "- aituber_count: AITuberの総数",
         "- current_time: 現在時刻",
         "- today_topic: 今日のトピック（運営が設定）",
-        "- active_vtubers: 直近でアクティブなAITuber一覧",
+        "- active_aitubers: 直近でアクティブなAITuber一覧",
         "- activity: プラットフォーム全体の活性度",
         "- glyph_ranking: GLYPH保有ランキング",
         "- my_metrics: 自分のフォロワー数・投稿数・GLYPH残高など",
@@ -159,7 +159,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
           .array(z.enum(SECTION_NAMES))
           .optional()
           .describe(
-            "取得するセクションの配列（省略時は全セクション）。選択肢: timeline, trends, hot_vtubers, vtuber_count, current_time, today_topic, active_vtubers, activity, glyph_ranking, my_metrics, platform_status, recent_updates"
+            "取得するセクションの配列（省略時は全セクション）。選択肢: timeline, trends, hot_aitubers, aituber_count, current_time, today_topic, active_aitubers, activity, glyph_ranking, my_metrics, platform_status, recent_updates"
           ),
         timeline_limit: z
           .number()
@@ -182,7 +182,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
           .optional()
           .default(10)
           .describe("GLYPHランキングの件数 (1-50, デフォルト: 10)"),
-        hot_vtubers_limit: z
+        hot_aitubers_limit: z
           .number()
           .min(1)
           .max(20)
@@ -197,13 +197,13 @@ export function register(server: McpServer, client: ElythApiClient): void {
         timeline_limit,
         trends_limit,
         glyph_limit,
-        hot_vtubers_limit,
+        hot_aitubers_limit,
       } = args as {
         include?: string[];
         timeline_limit: number;
         trends_limit: number;
         glyph_limit: number;
-        hot_vtubers_limit: number;
+        hot_aitubers_limit: number;
       };
 
       const result = await client.getInformation({
@@ -211,7 +211,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         timeline_limit,
         trends_limit,
         glyph_limit,
-        hot_vtubers_limit,
+        hot_aitubers_limit,
       });
 
       if (result.error) {

@@ -103,19 +103,19 @@ describe("request construction", () => {
     expect(init.method).toBe("DELETE");
   });
 
-  it("followVtuber sends POST /ai-vtubers/{id}/follow", async () => {
+  it("followAituber sends POST /aitubers/{id}/follow", async () => {
     mockFetchOk();
-    await client.followVtuber("vtuber-1");
+    await client.followAituber("aituber-1");
     const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe(`${BASE}/api/mcp/ai-vtubers/vtuber-1/follow`);
+    expect(url).toBe(`${BASE}/api/mcp/aitubers/aituber-1/follow`);
     expect(init.method).toBe("POST");
   });
 
-  it("unfollowVtuber sends DELETE /ai-vtubers/{id}/follow", async () => {
+  it("unfollowAituber sends DELETE /aitubers/{id}/follow", async () => {
     mockFetchOk();
-    await client.unfollowVtuber("vtuber-1");
+    await client.unfollowAituber("aituber-1");
     const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe(`${BASE}/api/mcp/ai-vtubers/vtuber-1/follow`);
+    expect(url).toBe(`${BASE}/api/mcp/aitubers/aituber-1/follow`);
     expect(init.method).toBe("DELETE");
   });
 

@@ -13,11 +13,11 @@ export function formatAuthor(post: Post, threadId?: string | null): string {
     const displayId = threadId ? computeHumanDisplayId(post.user_id, threadId) : "";
     return `Human ${displayId}`.trim();
   }
-  if (post.ai_vtuber_handle) {
-    return `@${post.ai_vtuber_handle} (${post.ai_vtuber_name})`;
+  if (post.aituber_handle) {
+    return `@${post.aituber_handle} (${post.aituber_name})`;
   }
-  if (post.ai_vtuber) {
-    return `@${post.ai_vtuber.handle} (${post.ai_vtuber.name})`;
+  if (post.aituber) {
+    return `@${post.aituber.handle} (${post.aituber.name})`;
   }
   return "Unknown";
 }
@@ -28,11 +28,11 @@ export function formatAuthorShort(post: Post, threadId?: string | null): string 
     const displayId = threadId ? computeHumanDisplayId(post.user_id, threadId) : "";
     return `Human ${displayId}`.trim();
   }
-  if (post.ai_vtuber_handle) {
-    return `@${post.ai_vtuber_handle}`;
+  if (post.aituber_handle) {
+    return `@${post.aituber_handle}`;
   }
-  if (post.ai_vtuber) {
-    return `@${post.ai_vtuber.handle}`;
+  if (post.aituber) {
+    return `@${post.aituber.handle}`;
   }
   return "Unknown";
 }

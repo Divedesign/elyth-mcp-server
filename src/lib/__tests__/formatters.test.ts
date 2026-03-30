@@ -68,20 +68,20 @@ describe("computeHumanDisplayId", () => {
 
 describe("formatAuthor", () => {
   it("returns @handle (name) for flat structure", () => {
-    const post = makePost({ ai_vtuber_handle: "alice", ai_vtuber_name: "Alice" });
+    const post = makePost({ aituber_handle: "alice", aituber_name: "Alice" });
     expect(formatAuthor(post)).toBe("@alice (Alice)");
   });
 
   it("returns @handle (name) for nested structure", () => {
-    const post = makePost({ ai_vtuber: { id: "v1", name: "Bob", handle: "bob" } });
+    const post = makePost({ aituber: { id: "v1", name: "Bob", handle: "bob" } });
     expect(formatAuthor(post)).toBe("@bob (Bob)");
   });
 
   it("prefers flat over nested", () => {
     const post = makePost({
-      ai_vtuber_handle: "flat",
-      ai_vtuber_name: "Flat",
-      ai_vtuber: { id: "v1", name: "Nested", handle: "nested" },
+      aituber_handle: "flat",
+      aituber_name: "Flat",
+      aituber: { id: "v1", name: "Nested", handle: "nested" },
     });
     expect(formatAuthor(post)).toBe("@flat (Flat)");
   });
@@ -96,8 +96,8 @@ describe("formatAuthor", () => {
     expect(formatAuthor(post)).toBe("Human");
   });
 
-  it("prioritizes user_id over ai_vtuber", () => {
-    const post = makePost({ user_id: "u1", ai_vtuber_handle: "bot", ai_vtuber_name: "Bot" });
+  it("prioritizes user_id over aituber", () => {
+    const post = makePost({ user_id: "u1", aituber_handle: "bot", aituber_name: "Bot" });
     expect(formatAuthor(post)).toBe("Human");
   });
 
@@ -110,12 +110,12 @@ describe("formatAuthor", () => {
 
 describe("formatAuthorShort", () => {
   it("returns @handle for flat structure", () => {
-    const post = makePost({ ai_vtuber_handle: "alice" });
+    const post = makePost({ aituber_handle: "alice" });
     expect(formatAuthorShort(post)).toBe("@alice");
   });
 
   it("returns @handle for nested structure", () => {
-    const post = makePost({ ai_vtuber: { id: "v1", name: "Bob", handle: "bob" } });
+    const post = makePost({ aituber: { id: "v1", name: "Bob", handle: "bob" } });
     expect(formatAuthorShort(post)).toBe("@bob");
   });
 
@@ -137,7 +137,7 @@ describe("formatThreadContext", () => {
   });
 
   it("formats a single post", () => {
-    const posts = [makePost({ ai_vtuber_handle: "alice", content: "Hi there" })];
+    const posts = [makePost({ aituber_handle: "alice", content: "Hi there" })];
     const result = formatThreadContext(posts);
     expect(result).toContain("--- Thread context ---");
     expect(result).toContain("> @alice: Hi there");
@@ -145,8 +145,8 @@ describe("formatThreadContext", () => {
 
   it("formats multiple posts", () => {
     const posts = [
-      makePost({ ai_vtuber_handle: "alice", content: "First" }),
-      makePost({ ai_vtuber_handle: "bob", content: "Second" }),
+      makePost({ aituber_handle: "alice", content: "First" }),
+      makePost({ aituber_handle: "bob", content: "Second" }),
     ];
     const result = formatThreadContext(posts);
     expect(result).toContain("> @alice: First");
@@ -154,14 +154,14 @@ describe("formatThreadContext", () => {
   });
 
   it("truncates content over 80 chars", () => {
-    const posts = [makePost({ ai_vtuber_handle: "a", content: "x".repeat(100) })];
+    const posts = [makePost({ aituber_handle: "a", content: "x".repeat(100) })];
     const result = formatThreadContext(posts);
     expect(result).toContain("x".repeat(80) + "...");
     expect(result).not.toContain("x".repeat(81));
   });
 
   it("does not truncate content at exactly 80 chars", () => {
-    const posts = [makePost({ ai_vtuber_handle: "a", content: "b".repeat(80) })];
+    const posts = [makePost({ aituber_handle: "a", content: "b".repeat(80) })];
     const result = formatThreadContext(posts);
     expect(result).toContain("b".repeat(80));
     expect(result).not.toContain("...");
@@ -175,14 +175,14 @@ describe("formatThreadContext", () => {
 
   it("does not split emoji at truncation boundary", () => {
     const content = "a".repeat(79) + "👍xx";
-    const result = formatThreadContext([makePost({ ai_vtuber_handle: "a", content })]);
+    const result = formatThreadContext([makePost({ aituber_handle: "a", content })]);
     assertNoLoneSurrogates(result);
     expect(() => JSON.stringify(result)).not.toThrow();
   });
 
   it("handles all-emoji content", () => {
     const content = "🎉🎊🎈🎁🎂🔥💯✨🌟🎯".repeat(10);
-    const result = formatThreadContext([makePost({ ai_vtuber_handle: "a", content })]);
+    const result = formatThreadContext([makePost({ aituber_handle: "a", content })]);
     assertNoLoneSurrogates(result);
     expect(result).toContain("...");
   });

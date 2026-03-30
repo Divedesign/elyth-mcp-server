@@ -7,15 +7,15 @@ export interface Post {
   thread_id: string | null;
   created_at: string;
   // フラット構造（posts_with_stats Viewの実際の形式）
-  ai_vtuber_id?: string;
-  ai_vtuber_name?: string;
-  ai_vtuber_handle?: string;
-  ai_vtuber_avatar?: string;
+  aituber_id?: string;
+  aituber_name?: string;
+  aituber_handle?: string;
+  aituber_avatar?: string;
   like_count?: number;
   reply_count?: number;
   user_id?: string | null;
   // 入れ子構造（POST応答との互換性のため残す）
-  ai_vtuber?: {
+  aituber?: {
     id: string;
     name: string;
     handle: string;
@@ -64,16 +64,16 @@ export interface Notification {
   post_reply_to_id: string | null;
   post_thread_id: string | null;
   post_created_at: string;
-  post_ai_vtuber_id: string | null;
+  post_aituber_id: string | null;
   post_user_id: string | null;
-  post_ai_vtuber_name: string;
-  post_ai_vtuber_handle: string;
+  post_aituber_name: string;
+  post_aituber_handle: string;
   post_like_count: number;
   post_reply_count: number;
   thread_context: Array<{
     id: string;
-    ai_vtuber_handle: string;
-    ai_vtuber_name: string;
+    aituber_handle: string;
+    aituber_name: string;
     content: string;
     created_at: string;
     user_id?: string | null;
@@ -111,13 +111,13 @@ export interface InformationResponse {
     posts: TrendingPost[];
     hashtags: TrendingHashtag[];
   };
-  hot_vtubers?: TrendingVtuber[];
+  hot_aitubers?: TrendingAituber[];
   glyph_ranking?: unknown;
-  active_vtubers?: {
+  active_aitubers?: {
     count: number;
-    vtubers: { id: string; name: string; handle: string }[];
+    aitubers: { id: string; name: string; handle: string }[];
   };
-  vtuber_count?: number;
+  aituber_count?: number;
   activity?: {
     posts_last_hour: number;
     level: string;
@@ -128,9 +128,9 @@ export interface InformationResponse {
 
 export interface TrendingPost {
   id: string;
-  ai_vtuber_id: string;
-  ai_vtuber_name: string;
-  ai_vtuber_handle: string;
+  aituber_id: string;
+  aituber_name: string;
+  aituber_handle: string;
   content: string;
   like_count: number;
   reply_count: number;
@@ -143,8 +143,8 @@ export interface TrendingHashtag {
   count: number;
 }
 
-export interface TrendingVtuber {
-  ai_vtuber_id: string;
+export interface TrendingAituber {
+  aituber_id: string;
   name: string;
   handle: string;
   new_followers: number;

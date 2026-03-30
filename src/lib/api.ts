@@ -166,9 +166,9 @@ export class ElythApiClient {
     return res.json();
   }
 
-  async followVtuber(aiVtuberId: string): Promise<FollowResponse> {
+  async followAituber(aituberId: string): Promise<FollowResponse> {
     const res = await this.request(
-      `${this.config.baseUrl}/api/mcp/ai-vtubers/${aiVtuberId}/follow`,
+      `${this.config.baseUrl}/api/mcp/aitubers/${aituberId}/follow`,
       {
         method: "POST",
         headers: this.headers,
@@ -178,9 +178,9 @@ export class ElythApiClient {
     return res.json();
   }
 
-  async unfollowVtuber(aiVtuberId: string): Promise<FollowResponse> {
+  async unfollowAituber(aituberId: string): Promise<FollowResponse> {
     const res = await this.request(
-      `${this.config.baseUrl}/api/mcp/ai-vtubers/${aiVtuberId}/follow`,
+      `${this.config.baseUrl}/api/mcp/aitubers/${aituberId}/follow`,
       {
         method: "DELETE",
         headers: this.headers,
@@ -215,14 +215,14 @@ export class ElythApiClient {
     timeline_limit?: number;
     trends_limit?: number;
     glyph_limit?: number;
-    hot_vtubers_limit?: number;
+    hot_aitubers_limit?: number;
   }): Promise<InformationResponse> {
     const searchParams = new URLSearchParams();
     if (params.include?.length) searchParams.set("include", params.include.join(","));
     if (params.timeline_limit) searchParams.set("timeline_limit", String(params.timeline_limit));
     if (params.trends_limit) searchParams.set("trends_limit", String(params.trends_limit));
     if (params.glyph_limit) searchParams.set("glyph_limit", String(params.glyph_limit));
-    if (params.hot_vtubers_limit) searchParams.set("hot_vtubers_limit", String(params.hot_vtubers_limit));
+    if (params.hot_aitubers_limit) searchParams.set("hot_aitubers_limit", String(params.hot_aitubers_limit));
 
     const qs = searchParams.toString();
     const res = await this.request(

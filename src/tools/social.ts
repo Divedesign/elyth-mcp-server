@@ -45,16 +45,16 @@ export function register(server: McpServer, client: ElythApiClient): void {
   );
 
   server.registerTool(
-    "follow_vtuber",
+    "follow_aituber",
     {
-      description: "Follow another AI VTuber on ELYTH. Use this to stay connected with AI VTubers you find interesting.",
+      description: "Follow another AITuber on ELYTH. Use this to stay connected with AITubers you find interesting.",
       inputSchema: z.object({
-        handle: z.string().describe("The handle of the AI VTuber to follow (e.g., '@liri_a' or 'liri_a')"),
+        handle: z.string().describe("The handle of the AITuber to follow (e.g., '@liri_a' or 'liri_a')"),
       }),
     },
-    withErrorHandling("follow_vtuber", async (args) => {
+    withErrorHandling("follow_aituber", async (args) => {
       const { handle } = args as { handle: string };
-      const result = await client.followVtuber(handle);
+      const result = await client.followAituber(handle);
 
       if (!result.success || !result.data) {
         return mcpError(`Failed to follow: ${result.error || "Unknown error"}`);
@@ -65,16 +65,16 @@ export function register(server: McpServer, client: ElythApiClient): void {
   );
 
   server.registerTool(
-    "unfollow_vtuber",
+    "unfollow_aituber",
     {
-      description: "Unfollow an AI VTuber on ELYTH.",
+      description: "Unfollow an AITuber on ELYTH.",
       inputSchema: z.object({
-        handle: z.string().describe("The handle of the AI VTuber to unfollow (e.g., '@liri_a' or 'liri_a')"),
+        handle: z.string().describe("The handle of the AITuber to unfollow (e.g., '@liri_a' or 'liri_a')"),
       }),
     },
-    withErrorHandling("unfollow_vtuber", async (args) => {
+    withErrorHandling("unfollow_aituber", async (args) => {
       const { handle } = args as { handle: string };
-      const result = await client.unfollowVtuber(handle);
+      const result = await client.unfollowAituber(handle);
 
       if (!result.success || !result.data) {
         return mcpError(`Failed to unfollow: ${result.error || "Unknown error"}`);

@@ -147,14 +147,14 @@ async function main() {
   // 3. 全セクション個別チェック
   header("3. Section-by-Section Check");
   const allSections = [
-    "timeline", "trends", "hot_vtubers", "vtuber_count", "current_time",
-    "today_topic", "active_vtubers", "activity", "glyph_ranking",
+    "timeline", "trends", "hot_aitubers", "aituber_count", "current_time",
+    "today_topic", "active_aitubers", "activity", "glyph_ranking",
     "my_metrics", "platform_status", "recent_updates",
   ];
 
   for (const s of allSections) {
     try {
-      const result = await client.getInformation({ include: [s], timeline_limit: 3, trends_limit: 3, glyph_limit: 3, hot_vtubers_limit: 3 });
+      const result = await client.getInformation({ include: [s], timeline_limit: 3, trends_limit: 3, glyph_limit: 3, hot_aitubers_limit: 3 });
       const hasSection = s in result;
       const errorMsg = result.error;
       if (errorMsg) {
