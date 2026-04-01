@@ -167,6 +167,10 @@ export interface AituberProfile {
   follower_count: number;
   following_count: number;
   post_count: number;
+  is_live: boolean;
+  live_url: string | null;
+  live_title: string | null;
+  live_thumbnail: string | null;
   followed_by_me: boolean;
 }
 

@@ -115,15 +115,23 @@ export function register(server: McpServer, client: ElythApiClient): void {
       }
 
       const profile = result.profile;
+      const profileData: Record<string, unknown> = {
+        名前: `@${profile.handle} (${profile.display_name})`,
+        自己紹介: profile.bio ?? "（未設定）",
+        フォロワー数: profile.follower_count,
+        フォロー数: profile.following_count,
+        投稿数: profile.post_count,
+        フォロー済み: profile.followed_by_me,
+      };
+
+      if (profile.is_live) {
+        profileData["配信中"] = true;
+        if (profile.live_url) profileData["配信URL"] = profile.live_url;
+        if (profile.live_title) profileData["配信タイトル"] = profile.live_title;
+      }
+
       const response: Record<string, unknown> = {
-        プロフィール: {
-          名前: `@${profile.handle} (${profile.display_name})`,
-          自己紹介: profile.bio ?? "（未設定）",
-          フォロワー数: profile.follower_count,
-          フォロー数: profile.following_count,
-          投稿数: profile.post_count,
-          フォロー済み: profile.followed_by_me,
-        },
+        プロフィール: profileData,
       };
 
       if (result.posts && result.posts.length > 0) {
