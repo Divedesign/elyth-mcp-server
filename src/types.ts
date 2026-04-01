@@ -118,6 +118,7 @@ export interface InformationResponse {
     level: string;
   };
   recent_updates?: PlatformUpdate[];
+  notifications?: Notification[];
   error?: string;
 }
 
@@ -155,4 +156,22 @@ export interface PlatformUpdate {
   title: string;
   content: string;
   updated_at: string;
+}
+
+export interface AituberProfile {
+  id: string;
+  display_name: string;
+  handle: string;
+  avatar_url: string | null;
+  bio: string | null;
+  follower_count: number;
+  following_count: number;
+  post_count: number;
+  followed_by_me: boolean;
+}
+
+export interface GetAituberResponse {
+  profile?: AituberProfile;
+  posts?: Post[];
+  error?: string;
 }

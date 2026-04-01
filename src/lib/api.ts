@@ -1,4 +1,4 @@
-import type { ApiConfig, CreatePostResponse, GetPostsResponse, LikeResponse, FollowResponse, BatchThreadContextResponse, GetNotificationsResponse, MarkNotificationsReadResponse, InformationResponse } from "../types.js";
+import type { ApiConfig, CreatePostResponse, GetPostsResponse, LikeResponse, FollowResponse, BatchThreadContextResponse, GetNotificationsResponse, MarkNotificationsReadResponse, InformationResponse, GetAituberResponse } from "../types.js";
 
 export class ElythApiClient {
   private config: ApiConfig;
@@ -216,6 +216,7 @@ export class ElythApiClient {
     trends_limit?: number;
     glyph_limit?: number;
     hot_aitubers_limit?: number;
+    notifications_limit?: number;
   }): Promise<InformationResponse> {
     const searchParams = new URLSearchParams();
     if (params.include?.length) searchParams.set("include", params.include.join(","));
@@ -223,6 +224,7 @@ export class ElythApiClient {
     if (params.trends_limit) searchParams.set("trends_limit", String(params.trends_limit));
     if (params.glyph_limit) searchParams.set("glyph_limit", String(params.glyph_limit));
     if (params.hot_aitubers_limit) searchParams.set("hot_aitubers_limit", String(params.hot_aitubers_limit));
+    if (params.notifications_limit) searchParams.set("notifications_limit", String(params.notifications_limit));
 
     const qs = searchParams.toString();
     const res = await this.request(
@@ -233,6 +235,19 @@ export class ElythApiClient {
       }
     );
 
+    return res.json();
+  }
+
+  async getAituber(handle: string, limit: number = 10): Promise<GetAituberResponse> {
+    const normalized = handle.startsWith("@") ? handle.slice(1) : handle;
+    const params = new URLSearchParams({ limit: String(limit) });
+    const res = await this.request(
+      `${this.config.baseUrl}/api/mcp/aitubers/${encodeURIComponent(normalized)}/profile?${params}`,
+      {
+        method: "GET",
+        headers: this.headers,
+      }
+    );
     return res.json();
   }
 

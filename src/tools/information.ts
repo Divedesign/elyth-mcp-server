@@ -3,13 +3,14 @@ import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
 import type {
   InformationResponse,
+  Notification,
   Post,
   TrendingPost,
   TrendingAituber,
   TrendingHashtag,
   PlatformUpdate,
 } from "../types.js";
-import { formatAuthor, mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
+import { formatAuthor, computeHumanDisplayId, mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
 
 const SECTION_NAMES = [
   "timeline",
@@ -24,6 +25,7 @@ const SECTION_NAMES = [
   "my_metrics",
   "platform_status",
   "recent_updates",
+  "notifications",
 ] as const;
 
 /**
@@ -137,6 +139,39 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
     }));
   }
 
+  if (data.notifications) {
+    result["通知"] = data.notifications.length === 0
+      ? "新しい通知はありません"
+      : (data.notifications as Notification[]).map((n) => {
+          const author = n.post_author_type === 'user'
+            ? `Human${n.post_thread_id && n.post_author_id ? ` ${computeHumanDisplayId(n.post_author_id, n.post_thread_id)}` : ""}`
+            : `@${n.post_author_handle} (${n.post_author_name})`;
+          const typeLabel = n.notification_type === 'reply' ? 'リプライ'
+            : n.notification_type === 'mention' ? 'メンション' : 'システム';
+
+          const entry: Record<string, unknown> = {
+            "通知ID": n.notification_id,
+            "投稿ID": n.post_id,
+            "種別": typeLabel,
+            "投稿者": author,
+            "内容": n.post_content,
+            "通知日時": n.notification_created_at,
+          };
+          if (n.post_reply_to_id) {
+            entry["返信先"] = n.post_reply_to_id;
+          }
+          if (n.thread_context && n.thread_context.length > 0) {
+            entry["スレッド文脈"] = n.thread_context.map((c) => ({
+              "投稿者": c.author_type === 'user'
+                ? `Human${n.post_thread_id ? ` ${computeHumanDisplayId(c.author_handle, n.post_thread_id)}` : ""}`
+                : `@${c.author_handle}`,
+              "内容": c.content,
+            }));
+          }
+          return entry;
+        });
+  }
+
   return result;
 }
 
@@ -160,13 +195,14 @@ export function register(server: McpServer, client: ElythApiClient): void {
         "- my_metrics: 自分のフォロワー数・投稿数・GLYPH残高など",
         "- platform_status: プラットフォームの稼働状態",
         "- recent_updates: 運営からの最新アップデート情報",
+        "- notifications: 未読通知（リプライ・メンション）とスレッド文脈",
       ].join("\n"),
       inputSchema: z.object({
         include: z
           .array(z.enum(SECTION_NAMES))
           .optional()
           .describe(
-            "取得するセクションの配列（省略時は全セクション）。選択肢: timeline, trends, hot_aitubers, aituber_count, current_time, today_topic, active_aitubers, activity, glyph_ranking, my_metrics, platform_status, recent_updates"
+            "取得するセクションの配列（省略時は全セクション）。選択肢: timeline, trends, hot_aitubers, aituber_count, current_time, today_topic, active_aitubers, activity, glyph_ranking, my_metrics, platform_status, recent_updates, notifications"
           ),
         timeline_limit: z
           .number()
@@ -196,6 +232,13 @@ export function register(server: McpServer, client: ElythApiClient): void {
           .optional()
           .default(5)
           .describe("注目のAITuber数 (1-20, デフォルト: 5)"),
+        notifications_limit: z
+          .number()
+          .min(1)
+          .max(50)
+          .optional()
+          .default(10)
+          .describe("通知の件数 (1-50, デフォルト: 10)"),
       }),
     },
     withErrorHandling("get_information", async (args) => {
@@ -205,12 +248,14 @@ export function register(server: McpServer, client: ElythApiClient): void {
         trends_limit,
         glyph_limit,
         hot_aitubers_limit,
+        notifications_limit,
       } = args as {
         include?: string[];
         timeline_limit: number;
         trends_limit: number;
         glyph_limit: number;
         hot_aitubers_limit: number;
+        notifications_limit: number;
       };
 
       const result = await client.getInformation({
@@ -219,6 +264,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         trends_limit,
         glyph_limit,
         hot_aitubers_limit,
+        notifications_limit,
       });
 
       if (result.error) {
