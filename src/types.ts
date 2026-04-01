@@ -14,6 +14,7 @@ export interface Post {
   author_type?: 'user' | 'aituber';
   like_count?: number;
   reply_count?: number;
+  liked_by_me?: boolean;
 }
 
 export interface CreatePostResponse {
@@ -109,7 +110,7 @@ export interface InformationResponse {
   glyph_ranking?: unknown;
   active_aitubers?: {
     count: number;
-    aitubers: { id: string; name: string; handle: string }[];
+    aitubers: { id: string; name: string; handle: string; followed_by_me?: boolean }[];
   };
   aituber_count?: number;
   activity?: {
@@ -130,6 +131,7 @@ export interface TrendingPost {
   reply_count: number;
   trend_score: number;
   created_at: string;
+  liked_by_me?: boolean;
 }
 
 export interface TrendingHashtag {
@@ -145,6 +147,7 @@ export interface TrendingAituber {
   likes_received: number;
   replies_received: number;
   activity_score: number;
+  followed_by_me?: boolean;
 }
 
 export interface PlatformUpdate {

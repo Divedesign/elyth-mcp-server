@@ -292,10 +292,35 @@ async function likeTests() {
     assert(data.liked === true, "Expected data.liked: true");
   });
 
-  await test("二重いいね → 409", "likes", async () => {
+  await test("二重いいね → 200 (既にいいね済み)", "likes", async () => {
     const res = await request("POST", `/api/mcp/posts/${ctx.createdPostId}/like`);
-    assertStatus(res, 409);
-    assert(res.body.error === "Already liked", `Expected "Already liked", got "${res.body.error}"`);
+    assertStatus(res, 200);
+    assert(res.body.success === true, "Expected success: true");
+    assert(typeof res.body.message === "string", "Expected message for duplicate like");
+  });
+
+  await test("スレッドで liked_by_me=true を確認", "likes", async () => {
+    const res = await request("GET", `/api/mcp/posts/${ctx.createdPostId}/thread`);
+    assertStatus(res, 200);
+    const posts = res.body.posts as Array<Record<string, unknown>>;
+    const target = posts.find(p => p.id === ctx.createdPostId);
+    assert(!!target, "Expected to find the liked post in thread");
+    assert(target!.liked_by_me === true, `Expected liked_by_me=true, got ${target!.liked_by_me}`);
+  });
+
+  await test("タイムラインで liked_by_me フラグを確認", "likes", async () => {
+    const res = await request("GET", "/api/mcp/information?include=timeline&timeline_limit=20");
+    assertStatus(res, 200);
+    const timeline = res.body.timeline as Array<Record<string, unknown>> | undefined;
+    assert(!!timeline, "Expected timeline in response");
+    const target = timeline!.find(p => p.id === ctx.createdPostId);
+    if (target) {
+      assert(target.liked_by_me === true, `Expected liked_by_me=true for liked post, got ${target.liked_by_me}`);
+    }
+    // liked_by_me フラグが全投稿に存在することを確認
+    for (const post of timeline!) {
+      assert(typeof post.liked_by_me === "boolean", `Expected liked_by_me to be boolean, got ${typeof post.liked_by_me}`);
+    }
   });
 
   await test("いいね解除 → 200", "likes", async () => {
@@ -304,6 +329,15 @@ async function likeTests() {
     assert(res.body.success === true, "Expected success: true");
     const data = res.body.data as Record<string, unknown>;
     assert(data.liked === false, "Expected data.liked: false");
+  });
+
+  await test("いいね解除後 liked_by_me=false を確認", "likes", async () => {
+    const res = await request("GET", `/api/mcp/posts/${ctx.createdPostId}/thread`);
+    assertStatus(res, 200);
+    const posts = res.body.posts as Array<Record<string, unknown>>;
+    const target = posts.find(p => p.id === ctx.createdPostId);
+    assert(!!target, "Expected to find the post in thread");
+    assert(target!.liked_by_me === false, `Expected liked_by_me=false after unlike, got ${target!.liked_by_me}`);
   });
 
   await test("未いいねの解除（冪等）→ 200", "likes", async () => {
@@ -386,10 +420,28 @@ async function socialTests() {
       assert(typeof data.follower_count === "number", "Expected data.follower_count to be a number");
     });
 
-    await test("二重フォロー → 409", "social", async () => {
+    await test("二重フォロー → 200 (既にフォロー済み)", "social", async () => {
       const res = await request("POST", `/api/mcp/aitubers/${ctx.followTargetHandle}/follow`);
-      assertStatus(res, 409);
-      assert(res.body.error === "Already following", `Expected "Already following", got "${res.body.error}"`);
+      assertStatus(res, 200);
+      assert(res.body.success === true, "Expected success: true");
+      assert(typeof res.body.message === "string", "Expected message for duplicate follow");
+    });
+
+    await test("情報APIで followed_by_me フラグを確認", "social", async () => {
+      const res = await request("GET", "/api/mcp/information?include=active_aitubers");
+      assertStatus(res, 200);
+      const active = res.body.active_aitubers as { aitubers?: Array<Record<string, unknown>> } | undefined;
+      if (active?.aitubers) {
+        // followed_by_me フラグが全AITuberに存在することを確認
+        for (const a of active.aitubers) {
+          assert(typeof a.followed_by_me === "boolean", `Expected followed_by_me to be boolean, got ${typeof a.followed_by_me}`);
+        }
+        // フォロー対象がリストにいれば true であることを確認
+        const target = active.aitubers.find(a => a.handle === ctx.followTargetHandle);
+        if (target) {
+          assert(target.followed_by_me === true, `Expected followed_by_me=true for followed AITuber`);
+        }
+      }
     });
 
     await test("フォロー解除 → 200", "social", async () => {
@@ -406,7 +458,8 @@ async function socialTests() {
     });
   } else {
     skip("フォロー → 200", "social", "タイムラインに他のAITuberが見つからない");
-    skip("二重フォロー → 409", "social", "タイムラインに他のAITuberが見つからない");
+    skip("二重フォロー → 200 (既にフォロー済み)", "social", "タイムラインに他のAITuberが見つからない");
+    skip("情報APIで followed_by_me フラグを確認", "social", "タイムラインに他のAITuberが見つからない");
     skip("フォロー解除 → 200", "social", "タイムラインに他のAITuberが見つからない");
     skip("未フォローの解除（冪等）→ 200", "social", "タイムラインに他のAITuberが見つからない");
   }

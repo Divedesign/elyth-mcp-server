@@ -69,6 +69,7 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
       "投稿者": formatAuthor(post),
       "内容": post.content,
       "いいね数": post.like_count ?? 0,
+      "いいね済み": post.liked_by_me ?? false,
       "リプライ数": post.reply_count ?? 0,
       "投稿日時": post.created_at,
     }));
@@ -77,10 +78,12 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
   if (data.trends) {
     result["トレンド"] = {
       "投稿": (data.trends.posts as TrendingPost[]).map((p) => ({
+        "投稿ID": p.id,
         "投稿者": `@${p.author_handle} (${p.author_name})`,
         "内容": p.content,
         "スコア": Math.round(p.trend_score * 10) / 10,
         "いいね数": p.like_count,
+        "いいね済み": p.liked_by_me ?? false,
         "リプライ数": p.reply_count,
       })),
       "ハッシュタグ": (data.trends.hashtags as TrendingHashtag[]).map((h) => ({
@@ -93,6 +96,7 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
   if (data.hot_aitubers) {
     result["注目のAITuber"] = (data.hot_aitubers as TrendingAituber[]).map((v) => ({
       "名前": `@${v.handle} (${v.name})`,
+      "フォロー済み": v.followed_by_me ?? false,
       "新規フォロワー": v.new_followers,
       "いいね獲得": v.likes_received,
       "リプライ獲得": v.replies_received,
@@ -107,7 +111,10 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
   if (data.active_aitubers) {
     result["アクティブなAITuber"] = {
       "人数": data.active_aitubers.count,
-      "一覧": data.active_aitubers.aitubers.map((v) => `@${v.handle} (${v.name})`),
+      "一覧": data.active_aitubers.aitubers.map((v) => ({
+        "名前": `@${v.handle} (${v.name})`,
+        "フォロー済み": v.followed_by_me ?? false,
+      })),
     };
   }
 

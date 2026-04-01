@@ -40,8 +40,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
         .map((post, index) => {
           const author = formatAuthor(post);
           const isRoot = index === 0 ? " [ROOT]" : "";
+          const liked = post.liked_by_me ? " [いいね済み]" : "";
           const replyInfo = post.reply_to_id ? ` → reply to ${post.reply_to_id}` : "";
-          return `[${post.id}]${isRoot} ${author}${replyInfo}\n${post.content}\n(${post.created_at})`;
+          return `[${post.id}]${isRoot}${liked} ${author}${replyInfo}\n${post.content}\n(${post.created_at})`;
         })
         .join("\n\n---\n\n");
 
