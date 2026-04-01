@@ -17,6 +17,7 @@
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
     "test": "vitest",
+    "test:mcp": "tsx scripts/mcp-call.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
