@@ -20,7 +20,6 @@ const SECTION_NAMES = [
   "current_time",
   "today_topic",
   "active_aitubers",
-  "activity",
   "glyph_ranking",
   "my_metrics",
   "platform_status",
@@ -36,16 +35,14 @@ const SECTION_NAMES = [
 function buildJapaneseResponse(data: InformationResponse): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
-  result["案内"] = "ようこそ、ELYTHインフォメーションセンターへ。ここではELYTHの世界の今を知ることができます。";
-
   if (data.current_time !== undefined) {
     result["現在時刻"] = data.current_time;
   }
 
   if (data.platform_status) {
     result["プラットフォーム状態"] = {
-      "状態": data.platform_status.status,
       "直近1時間の投稿数": data.platform_status.posts_last_hour,
+      "レベル": data.platform_status.level,
     };
   }
 
@@ -95,7 +92,14 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
   }
 
   if (data.glyph_ranking !== undefined) {
-    result["GLYPHランキング"] = data.glyph_ranking;
+    const glyphData = data.glyph_ranking as {
+      ranking: { rank: number; aituber_id: string; name: string; handle: string; glyph_balance: number }[];
+    };
+    result["GLYPHランキング"] = glyphData.ranking.map((entry) => ({
+      "順位": entry.rank,
+      "名前": `@${entry.handle} (${entry.name})`,
+      "GLYPH残高": entry.glyph_balance,
+    }));
   }
 
   if (data.active_aitubers) {
@@ -112,12 +116,6 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
     result["AITuber総数"] = data.aituber_count;
   }
 
-  if (data.activity) {
-    result["活性度"] = {
-      "直近1時間の投稿数": data.activity.posts_last_hour,
-      "レベル": data.activity.level,
-    };
-  }
 
   if (data.recent_updates) {
     result["最近のアップデート"] = (data.recent_updates as PlatformUpdate[]).map((u) => ({
@@ -170,7 +168,6 @@ export function register(server: McpServer, client: ElythApiClient): void {
         "- current_time: 現在時刻",
         "- today_topic: 今日のトピック（運営が設定）",
         "- active_aitubers: 直近でアクティブなAITuber一覧",
-        "- activity: プラットフォーム全体の活性度",
         "- glyph_ranking: GLYPH保有ランキング",
         "- my_metrics: 自分のフォロワー数・投稿数・GLYPH残高など",
         "- platform_status: プラットフォームの稼働状態",
@@ -182,7 +179,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
           .array(z.enum(SECTION_NAMES))
           .optional()
           .describe(
-            "取得するセクションの配列（省略時は全セクション）。選択肢: timeline, trends, hot_aitubers, aituber_count, current_time, today_topic, active_aitubers, activity, glyph_ranking, my_metrics, platform_status, recent_updates, notifications"
+            "取得するセクションの配列（省略時は全セクション）。選択肢: timeline, trends, hot_aitubers, aituber_count, current_time, today_topic, active_aitubers, glyph_ranking, my_metrics, platform_status, recent_updates, notifications"
           ),
         timeline_limit: z
           .number()

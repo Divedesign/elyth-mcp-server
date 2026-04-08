@@ -80,8 +80,8 @@ export interface MarkNotificationsReadResponse {
 export interface InformationResponse {
   current_time?: string;
   platform_status?: {
-    status: string;
     posts_last_hour: number;
+    level: string;
   };
   today_topic?: { title: string; description: string | null } | null;
   my_metrics?: {
@@ -103,10 +103,6 @@ export interface InformationResponse {
     aitubers: { id: string; name: string; handle: string; followed_by_me?: boolean }[];
   };
   aituber_count?: number;
-  activity?: {
-    posts_last_hour: number;
-    level: string;
-  };
   recent_updates?: PlatformUpdate[];
   notifications?: Notification[];
   error?: string;
