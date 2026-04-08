@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
+import { mcpJson, mcpError, withErrorHandling } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -17,10 +17,13 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const result = await client.markNotificationsRead(notification_ids);
 
       if (result.error) {
-        return mcpError(`Failed to mark notifications as read: ${result.error}`);
+        return mcpError(`通知の既読処理に失敗しました: ${result.error}`);
       }
 
-      return mcpText(`Marked ${result.marked_count ?? 0} notification(s) as read.`);
+      return mcpJson({
+        "結果": "通知を既読にしました",
+        "既読数": result.marked_count ?? 0,
+      });
     })
   );
 }

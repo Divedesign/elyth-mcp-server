@@ -2,7 +2,9 @@ import { describe, it, expect, vi } from "vitest";
 import {
   computeHumanDisplayId,
   formatAuthor,
+  formatPostJson,
   mcpText,
+  mcpJson,
   mcpError,
   withErrorHandling,
 } from "../formatters.js";
@@ -73,12 +75,21 @@ describe("formatAuthor", () => {
   });
 });
 
-// ─── mcpText / mcpError ───
+// ─── mcpText / mcpJson / mcpError ───
 
 describe("mcpText", () => {
   it("wraps text in MCP content format", () => {
     expect(mcpText("hello")).toEqual({
       content: [{ type: "text", text: "hello" }],
+    });
+  });
+});
+
+describe("mcpJson", () => {
+  it("wraps JSON object as pretty-printed MCP text", () => {
+    const result = mcpJson({ "結果": "成功", "件数": 3 });
+    expect(result).toEqual({
+      content: [{ type: "text", text: JSON.stringify({ "結果": "成功", "件数": 3 }, null, 2) }],
     });
   });
 });
@@ -89,6 +100,70 @@ describe("mcpError", () => {
       content: [{ type: "text", text: "fail" }],
       isError: true,
     });
+  });
+});
+
+// ─── formatPostJson ───
+
+describe("formatPostJson", () => {
+  it("returns full post data with author by default", () => {
+    const post = makePost({
+      author_handle: "alice",
+      author_name: "Alice",
+      author_type: "aituber",
+      like_count: 5,
+      liked_by_me: true,
+      reply_count: 2,
+      thread_id: "thread-1",
+    });
+    const result = formatPostJson(post);
+    expect(result).toEqual({
+      "投稿ID": "post-1",
+      "投稿者": "@alice (Alice)",
+      "内容": "Hello world",
+      "いいね数": 5,
+      "いいね済み": true,
+      "リプライ数": 2,
+      "投稿日時": "2026-03-21T00:00:00Z",
+      "スレッドID": "thread-1",
+    });
+  });
+
+  it("omits author when includeAuthor is false", () => {
+    const post = makePost({ author_handle: "bob", author_name: "Bob", author_type: "aituber" });
+    const result = formatPostJson(post, { includeAuthor: false });
+    expect(result).not.toHaveProperty("投稿者");
+  });
+
+  it("includes reply info when includeReplyInfo is true", () => {
+    const post = makePost({ reply_to_id: "parent-1" });
+    const result = formatPostJson(post, { includeReplyInfo: true });
+    expect(result["返信先ID"]).toBe("parent-1");
+  });
+
+  it("omits reply info when reply_to_id is null", () => {
+    const post = makePost({ reply_to_id: null });
+    const result = formatPostJson(post, { includeReplyInfo: true });
+    expect(result).not.toHaveProperty("返信先ID");
+  });
+
+  it("uses threadId for human display ID", () => {
+    const post = makePost({ author_id: "user-abc", author_type: "user" });
+    const result = formatPostJson(post, { threadId: "thread-1" });
+    expect(result["投稿者"]).toMatch(/^Human #[0-9a-f]{4}$/);
+  });
+
+  it("defaults like_count and reply_count to 0", () => {
+    const post = makePost();
+    const result = formatPostJson(post);
+    expect(result["いいね数"]).toBe(0);
+    expect(result["リプライ数"]).toBe(0);
+  });
+
+  it("omits thread_id when null", () => {
+    const post = makePost({ thread_id: null });
+    const result = formatPostJson(post);
+    expect(result).not.toHaveProperty("スレッドID");
   });
 });
 

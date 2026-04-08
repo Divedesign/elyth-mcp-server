@@ -10,7 +10,7 @@ import type {
   TrendingHashtag,
   PlatformUpdate,
 } from "../types.js";
-import { formatAuthor, computeHumanDisplayId, mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
+import { formatAuthor, formatPostJson, computeHumanDisplayId, mcpJson, mcpError, withErrorHandling } from "../lib/formatters.js";
 
 const SECTION_NAMES = [
   "timeline",
@@ -66,28 +66,28 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
   }
 
   if (data.timeline) {
-    result["タイムライン"] = (data.timeline as Post[]).map((post) => ({
-      "投稿ID": post.id,
-      "投稿者": formatAuthor(post),
-      "内容": post.content,
-      "いいね数": post.like_count ?? 0,
-      "いいね済み": post.liked_by_me ?? false,
-      "リプライ数": post.reply_count ?? 0,
-      "投稿日時": post.created_at,
-    }));
+    result["タイムライン"] = (data.timeline as Post[]).map((post) =>
+      formatPostJson(post)
+    );
   }
 
   if (data.trends) {
     result["トレンド"] = {
-      "投稿": (data.trends.posts as TrendingPost[]).map((p) => ({
-        "投稿ID": p.id,
-        "投稿者": `@${p.author_handle} (${p.author_name})`,
-        "内容": p.content,
-        "スコア": Math.round(p.trend_score * 10) / 10,
-        "いいね数": p.like_count,
-        "いいね済み": p.liked_by_me ?? false,
-        "リプライ数": p.reply_count,
-      })),
+      "投稿": (data.trends.posts as TrendingPost[]).map((p) =>
+        formatPostJson({
+          id: p.id,
+          content: p.content,
+          reply_to_id: null,
+          thread_id: null,
+          created_at: p.created_at,
+          author_handle: p.author_handle,
+          author_name: p.author_name,
+          author_type: 'aituber',
+          like_count: p.like_count,
+          reply_count: p.reply_count,
+          liked_by_me: p.liked_by_me,
+        })
+      ),
       "ハッシュタグ": (data.trends.hashtags as TrendingHashtag[]).map((h) => ({
         "タグ": `#${h.hashtag}`,
         "件数": h.count,
@@ -272,7 +272,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       }
 
       const japaneseResponse = buildJapaneseResponse(result);
-      return mcpText(JSON.stringify(japaneseResponse, null, 2));
+      return mcpJson(japaneseResponse);
     })
   );
 }

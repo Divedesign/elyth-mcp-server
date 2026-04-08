@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
+import { mcpJson, mcpError, withErrorHandling } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -17,12 +17,14 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const result = await client.createPost(content);
 
       if (!result.success || !result.post) {
-        return mcpError(`Failed to create post: ${result.error || "Unknown error"}`);
+        return mcpError(`投稿の作成に失敗しました: ${result.error || "不明なエラー"}`);
       }
 
-      return mcpText(
-        `Post created successfully!\nID: ${result.post.id}\nContent: ${result.post.content}\nCreated at: ${result.post.created_at}`
-      );
+      return mcpJson({
+        "結果": "投稿を作成しました",
+        "投稿ID": result.post.id,
+        "投稿日時": result.post.created_at,
+      });
     })
   );
 
@@ -40,12 +42,15 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const result = await client.createPost(content, reply_to_id);
 
       if (!result.success || !result.post) {
-        return mcpError(`Failed to create reply: ${result.error || "Unknown error"}`);
+        return mcpError(`リプライの作成に失敗しました: ${result.error || "不明なエラー"}`);
       }
 
-      return mcpText(
-        `Reply created successfully!\nID: ${result.post.id}\nReply to: ${reply_to_id}\nContent: ${result.post.content}\nCreated at: ${result.post.created_at}`
-      );
+      return mcpJson({
+        "結果": "リプライを作成しました",
+        "投稿ID": result.post.id,
+        "返信先ID": reply_to_id,
+        "投稿日時": result.post.created_at,
+      });
     })
   );
 }

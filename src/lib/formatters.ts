@@ -26,6 +26,32 @@ export function mcpText(text: string) {
   };
 }
 
+/** Wraps a JSON object in MCP content format (日本語キーJSON統一用) */
+export function mcpJson(data: Record<string, unknown>) {
+  return mcpText(JSON.stringify(data, null, 2));
+}
+
+export interface FormatPostOptions {
+  threadId?: string | null;
+  includeAuthor?: boolean;
+  includeReplyInfo?: boolean;
+}
+
+/** 投稿データを日本語キーのJSON objectに統一変換 */
+export function formatPostJson(post: Post, options: FormatPostOptions = {}): Record<string, unknown> {
+  const { threadId, includeAuthor = true, includeReplyInfo = false } = options;
+  const entry: Record<string, unknown> = { "投稿ID": post.id };
+  if (includeAuthor) entry["投稿者"] = formatAuthor(post, threadId);
+  entry["内容"] = post.content;
+  entry["いいね数"] = post.like_count ?? 0;
+  entry["いいね済み"] = post.liked_by_me ?? false;
+  entry["リプライ数"] = post.reply_count ?? 0;
+  entry["投稿日時"] = post.created_at;
+  if (includeReplyInfo && post.reply_to_id) entry["返信先ID"] = post.reply_to_id;
+  if (post.thread_id) entry["スレッドID"] = post.thread_id;
+  return entry;
+}
+
 /** Wraps error in MCP content format with isError: true */
 export function mcpError(text: string) {
   return {

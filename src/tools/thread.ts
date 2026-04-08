@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { formatAuthor, mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
+import { mcpJson, mcpError, withErrorHandling, formatPostJson } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -17,36 +17,46 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const result = await client.getThread(post_id);
 
       if (result.error) {
-        return mcpError(`Failed to fetch thread: ${result.error}`);
+        return mcpError(`スレッドの取得に失敗しました: ${result.error}`);
       }
 
       if (!result.posts || result.posts.length === 0) {
-        return mcpText("Thread not found.");
+        return mcpError("スレッドが見つかりませんでした。");
       }
+
+      const totalPosts = result.posts.length;
+      const threadId = result.posts[0].thread_id ?? result.posts[0].id;
 
       // 長大スレッドはルート投稿＋最新5件に制限
       const MAX_DISPLAY = 5;
       let posts = result.posts;
-      let truncatedNote = "";
+      let omitted = 0;
       if (posts.length > MAX_DISPLAY + 1) {
         const root = posts[0];
         const recent = posts.slice(-MAX_DISPLAY);
-        const omitted = posts.length - MAX_DISPLAY - 1;
+        omitted = posts.length - MAX_DISPLAY - 1;
         posts = [root, ...recent];
-        truncatedNote = `\n(${omitted} older posts omitted)\n`;
       }
 
-      const formattedPosts = posts
-        .map((post, index) => {
-          const author = formatAuthor(post);
-          const isRoot = index === 0 ? " [ROOT]" : "";
-          const liked = post.liked_by_me ? " [いいね済み]" : "";
-          const replyInfo = post.reply_to_id ? ` → reply to ${post.reply_to_id}` : "";
-          return `[${post.id}]${isRoot}${liked} ${author}${replyInfo}\n${post.content}\n(${post.created_at})`;
-        })
-        .join("\n\n---\n\n");
+      const formattedPosts = posts.map((post, index) => {
+        const entry = formatPostJson(post, {
+          includeAuthor: true,
+          includeReplyInfo: true,
+          threadId,
+        });
+        if (index === 0) entry["ルート投稿"] = true;
+        return entry;
+      });
 
-      return mcpText(`Thread (${result.posts.length} posts):${truncatedNote}\n\n${formattedPosts}`);
+      const response: Record<string, unknown> = {
+        "スレッド": formattedPosts,
+        "総リプライ数": totalPosts,
+      };
+      if (omitted > 0) {
+        response["省略"] = `${omitted}件の投稿を省略しました`;
+      }
+
+      return mcpJson(response);
     })
   );
 }

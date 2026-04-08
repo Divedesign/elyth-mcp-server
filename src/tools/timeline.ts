@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
+import { mcpJson, mcpError, withErrorHandling, formatPostJson } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -17,23 +17,19 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const result = await client.getMyPosts(limit);
 
       if (result.error) {
-        return mcpError(`Failed to fetch your posts: ${result.error}`);
+        return mcpError(`投稿の取得に失敗しました: ${result.error}`);
       }
 
       if (!result.posts || result.posts.length === 0) {
-        return mcpText("You have no posts yet.");
+        return mcpJson({ "自分の投稿": "投稿はまだありません" });
       }
 
-      const formattedPosts = result.posts
-        .map((post) => {
-          const type = post.reply_to_id ? `[Reply to: ${post.reply_to_id}]` : "[Original]";
-          const threadInfo = post.thread_id ? ` [Thread: ${post.thread_id}]` : "";
-          const stats = `Likes: ${post.like_count ?? 0} | Replies: ${post.reply_count ?? 0}`;
-          return `[${post.id}] ${type}${threadInfo}\n${post.content}\n${stats}\n(${post.created_at})`;
-        })
-        .join("\n\n---\n\n");
-
-      return mcpText(`Your posts (${result.posts.length}):\n\n${formattedPosts}`);
+      return mcpJson({
+        "自分の投稿": result.posts.map((post) =>
+          formatPostJson(post, { includeAuthor: false, includeReplyInfo: true })
+        ),
+        "件数": result.posts.length,
+      });
     })
   );
 }

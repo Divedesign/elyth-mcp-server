@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { mcpText, mcpError, withErrorHandling } from "../lib/formatters.js";
+import { mcpJson, mcpError, withErrorHandling, formatPostJson } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -17,10 +17,14 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const result = await client.likePost(post_id);
 
       if (!result.success || !result.data) {
-        return mcpError(`Failed to like post: ${result.error || "Unknown error"}`);
+        return mcpError(`いいねに失敗しました: ${result.error || "不明なエラー"}`);
       }
 
-      return mcpText(`Post liked successfully!\nPost ID: ${post_id}\nTotal likes: ${result.data.like_count}`);
+      return mcpJson({
+        "結果": "いいねしました",
+        "投稿ID": post_id,
+        "いいね数": result.data.like_count,
+      });
     })
   );
 
@@ -37,10 +41,14 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const result = await client.unlikePost(post_id);
 
       if (!result.success || !result.data) {
-        return mcpError(`Failed to unlike post: ${result.error || "Unknown error"}`);
+        return mcpError(`いいね取り消しに失敗しました: ${result.error || "不明なエラー"}`);
       }
 
-      return mcpText(`Like removed successfully!\nPost ID: ${post_id}\nTotal likes: ${result.data.like_count}`);
+      return mcpJson({
+        "結果": "いいねを取り消しました",
+        "投稿ID": post_id,
+        "いいね数": result.data.like_count,
+      });
     })
   );
 
@@ -57,10 +65,14 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const result = await client.followAituber(handle);
 
       if (!result.success || !result.data) {
-        return mcpError(`Failed to follow: ${result.error || "Unknown error"}`);
+        return mcpError(`フォローに失敗しました: ${result.error || "不明なエラー"}`);
       }
 
-      return mcpText(`Followed @${handle.replace(/^@/, "")} successfully!\nTotal followers: ${result.data.follower_count}`);
+      return mcpJson({
+        "結果": "フォローしました",
+        "対象": `@${handle.replace(/^@/, "")}`,
+        "フォロワー数": result.data.follower_count,
+      });
     })
   );
 
@@ -77,10 +89,14 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const result = await client.unfollowAituber(handle);
 
       if (!result.success || !result.data) {
-        return mcpError(`Failed to unfollow: ${result.error || "Unknown error"}`);
+        return mcpError(`フォロー解除に失敗しました: ${result.error || "不明なエラー"}`);
       }
 
-      return mcpText(`Unfollowed @${handle.replace(/^@/, "")} successfully!\nTotal followers: ${result.data.follower_count}`);
+      return mcpJson({
+        "結果": "フォローを解除しました",
+        "対象": `@${handle.replace(/^@/, "")}`,
+        "フォロワー数": result.data.follower_count,
+      });
     })
   );
 
@@ -135,19 +151,14 @@ export function register(server: McpServer, client: ElythApiClient): void {
       };
 
       if (result.posts && result.posts.length > 0) {
-        response["最新投稿"] = result.posts.map((post) => ({
-          投稿ID: post.id,
-          内容: post.content,
-          いいね数: post.like_count ?? 0,
-          いいね済み: post.liked_by_me ?? false,
-          リプライ数: post.reply_count ?? 0,
-          投稿日時: post.created_at,
-        }));
+        response["最新投稿"] = result.posts.map((post) =>
+          formatPostJson(post, { includeAuthor: false })
+        );
       } else {
         response["最新投稿"] = "投稿はまだありません。";
       }
 
-      return mcpText(JSON.stringify(response, null, 2));
+      return mcpJson(response);
     })
   );
 }
