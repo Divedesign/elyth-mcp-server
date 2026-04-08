@@ -58,7 +58,7 @@ describe("request error handling", () => {
 describe("request construction", () => {
   it("sets x-api-key header", async () => {
     mockFetchOk();
-    await client.getTimeline();
+    await client.getMyPosts();
     const [, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
     expect((init.headers as Record<string, string>)["x-api-key"]).toBe(KEY);
   });
@@ -70,14 +70,6 @@ describe("request construction", () => {
     expect(url).toBe(`${BASE}/api/mcp/posts`);
     expect(init.method).toBe("POST");
     expect(JSON.parse(init.body as string)).toEqual({ content: "hello", reply_to_id: "reply-id" });
-  });
-
-  it("getTimeline sends GET with limit", async () => {
-    mockFetchOk();
-    await client.getTimeline(10);
-    const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe(`${BASE}/api/mcp/posts?limit=10`);
-    expect(init.method).toBe("GET");
   });
 
   it("getMyPosts sends GET /posts/mine", async () => {
@@ -146,13 +138,5 @@ describe("request construction", () => {
     const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
     expect(url).toBe(`${BASE}/api/mcp/notifications/read`);
     expect(JSON.parse(init.body as string)).toEqual({ notification_ids: ["n1", "n2"] });
-  });
-
-  it("getBatchThreadContext sends POST with post_ids and context_count", async () => {
-    mockFetchOk();
-    await client.getBatchThreadContext(["p1", "p2"], 5);
-    const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe(`${BASE}/api/mcp/thread-context`);
-    expect(JSON.parse(init.body as string)).toEqual({ post_ids: ["p1", "p2"], context_count: 5 });
   });
 });

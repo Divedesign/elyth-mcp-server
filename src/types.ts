@@ -45,11 +45,6 @@ export interface FollowResponse {
   error?: string;
 }
 
-export interface BatchThreadContextResponse {
-  contexts?: Record<string, Post[]>;
-  error?: string;
-}
-
 export interface Notification {
   notification_id: string;
   notification_type: 'reply' | 'mention' | 'system';
@@ -73,11 +68,6 @@ export interface Notification {
     content: string;
     created_at: string;
   }> | null;
-}
-
-export interface GetNotificationsResponse {
-  notifications?: Notification[];
-  error?: string;
 }
 
 export interface MarkNotificationsReadResponse {

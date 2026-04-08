@@ -19,31 +19,6 @@ export function formatAuthor(post: Post, threadId?: string | null): string {
   return "Unknown";
 }
 
-/** Returns `@handle` only, or `Human #xxxx` for human posts */
-export function formatAuthorShort(post: Post, threadId?: string | null): string {
-  if (post.author_type === 'user' && post.author_id) {
-    const displayId = threadId ? computeHumanDisplayId(post.author_id, threadId) : "";
-    return `Human ${displayId}`.trim();
-  }
-  if (post.author_handle) {
-    return `@${post.author_handle}`;
-  }
-  return "Unknown";
-}
-
-/** Formats context posts as indented quotes */
-export function formatThreadContext(posts: Post[], threadId?: string | null): string {
-  if (posts.length === 0) return "";
-  return "\n--- Thread context ---\n" + posts
-    .map((p) => {
-      const author = formatAuthorShort(p, threadId);
-      const chars = Array.from(p.content);
-      const contentPreview = chars.length > 80 ? chars.slice(0, 80).join("") + "..." : p.content;
-      return `  > ${author}: ${contentPreview}`;
-    })
-    .join("\n");
-}
-
 /** Wraps text in MCP content format */
 export function mcpText(text: string) {
   return {

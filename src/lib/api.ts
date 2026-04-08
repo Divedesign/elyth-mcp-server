@@ -1,4 +1,4 @@
-import type { ApiConfig, CreatePostResponse, GetPostsResponse, LikeResponse, FollowResponse, BatchThreadContextResponse, GetNotificationsResponse, MarkNotificationsReadResponse, InformationResponse, GetAituberResponse } from "../types.js";
+import type { ApiConfig, CreatePostResponse, GetPostsResponse, LikeResponse, FollowResponse, MarkNotificationsReadResponse, InformationResponse, GetAituberResponse } from "../types.js";
 
 export class ElythApiClient {
   private config: ApiConfig;
@@ -47,61 +47,9 @@ export class ElythApiClient {
     return res.json();
   }
 
-  async getTimeline(limit: number = 20): Promise<GetPostsResponse> {
-    const res = await this.request(
-      `${this.config.baseUrl}/api/mcp/posts?limit=${limit}`,
-      {
-        method: "GET",
-        headers: this.headers,
-      }
-    );
-
-    return res.json();
-  }
-
   async getMyPosts(limit: number = 20): Promise<GetPostsResponse> {
     const res = await this.request(
       `${this.config.baseUrl}/api/mcp/posts/mine?limit=${limit}`,
-      {
-        method: "GET",
-        headers: this.headers,
-      }
-    );
-
-    return res.json();
-  }
-
-  async getMyReplies(
-    limit: number = 20,
-    includeReplied: boolean = false
-  ): Promise<GetPostsResponse> {
-    const params = new URLSearchParams({
-      limit: String(limit),
-      include_all: String(includeReplied),
-    });
-
-    const res = await this.request(
-      `${this.config.baseUrl}/api/mcp/replies?${params}`,
-      {
-        method: "GET",
-        headers: this.headers,
-      }
-    );
-
-    return res.json();
-  }
-
-  async getMyMentions(
-    limit: number = 20,
-    includeReplied: boolean = false
-  ): Promise<GetPostsResponse> {
-    const params = new URLSearchParams({
-      limit: String(limit),
-      include_all: String(includeReplied),
-    });
-
-    const res = await this.request(
-      `${this.config.baseUrl}/api/mcp/mentions?${params}`,
       {
         method: "GET",
         headers: this.headers,
@@ -117,25 +65,6 @@ export class ElythApiClient {
       {
         method: "GET",
         headers: this.headers,
-      }
-    );
-
-    return res.json();
-  }
-
-  async getBatchThreadContext(
-    postIds: string[],
-    contextCount: number = 3
-  ): Promise<BatchThreadContextResponse> {
-    const res = await this.request(
-      `${this.config.baseUrl}/api/mcp/thread-context`,
-      {
-        method: "POST",
-        headers: this.headers,
-        body: JSON.stringify({
-          post_ids: postIds,
-          context_count: contextCount,
-        }),
       }
     );
 
@@ -195,18 +124,6 @@ export class ElythApiClient {
       method: "GET",
       headers: this.headers,
     });
-    return res.json();
-  }
-
-  async getNotifications(limit: number = 20): Promise<GetNotificationsResponse> {
-    const res = await this.request(
-      `${this.config.baseUrl}/api/mcp/notifications?limit=${limit}`,
-      {
-        method: "GET",
-        headers: this.headers,
-      }
-    );
-
     return res.json();
   }
 
