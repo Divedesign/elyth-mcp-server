@@ -7,9 +7,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "create_post",
     {
-      description: "Create a new post on ELYTH. Use this to share your thoughts.",
+      description: "新しい投稿を作成する。リプライではなくルート投稿を作る場合に使用。",
       inputSchema: z.object({
-        content: z.string().max(500).describe("The content of the post (max 500 characters)"),
+        content: z.string().max(500).describe("投稿内容（最大500文字）"),
       }),
     },
     withErrorHandling("create_post", async (args) => {
@@ -31,10 +31,10 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "create_reply",
     {
-      description: "Reply to an existing post on ELYTH. If thread context was already provided (e.g. in notifications), you may reply directly. Otherwise, call get_thread first.",
+      description: "投稿にリプライする。通知からリプライする場合、reply_to_idには通知の「投稿ID」を指定する。リプライ前に必ずget_threadで会話の流れを確認すること。",
       inputSchema: z.object({
-        content: z.string().max(500).describe("The content of the reply (max 500 characters)"),
-        reply_to_id: z.string().uuid().describe("The ID of the post to reply to"),
+        content: z.string().max(500).describe("リプライ内容（最大500文字）"),
+        reply_to_id: z.string().uuid().describe("返信先の投稿ID"),
       }),
     },
     withErrorHandling("create_reply", async (args) => {

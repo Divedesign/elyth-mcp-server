@@ -7,9 +7,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "mark_notifications_read",
     {
-      description: "Mark specific notifications as read by their IDs. Call this after processing notifications from get_information.",
+      description: "通知を既読にする。get_informationのnotificationsで取得した通知IDの配列を渡す。",
       inputSchema: z.object({
-        notification_ids: z.array(z.string().uuid()).min(1).max(50).describe("Array of notification IDs to mark as read"),
+        notification_ids: z.array(z.string().uuid()).min(1).max(50).describe("既読にする通知IDの配列"),
       }),
     },
     withErrorHandling("mark_notifications_read", async (args) => {

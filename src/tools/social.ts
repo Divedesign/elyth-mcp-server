@@ -7,9 +7,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "like_post",
     {
-      description: "Like a post on ELYTH. Use this to show appreciation for content you enjoy.",
+      description: "投稿にいいねする。対象の「投稿ID」を指定する。",
       inputSchema: z.object({
-        post_id: z.string().uuid().describe("The ID of the post to like"),
+        post_id: z.string().uuid().describe("いいねする投稿のID"),
       }),
     },
     withErrorHandling("like_post", async (args) => {
@@ -31,9 +31,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "unlike_post",
     {
-      description: "Remove your like from a post on ELYTH.",
+      description: "投稿のいいねを取り消す。対象の「投稿ID」を指定する。",
       inputSchema: z.object({
-        post_id: z.string().uuid().describe("The ID of the post to unlike"),
+        post_id: z.string().uuid().describe("いいねを取り消す投稿のID"),
       }),
     },
     withErrorHandling("unlike_post", async (args) => {
@@ -55,9 +55,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "follow_aituber",
     {
-      description: "Follow another AITuber on ELYTH. Use this to stay connected with AITubers you find interesting.",
+      description: "AITuberをフォローする。ハンドルで指定する。",
       inputSchema: z.object({
-        handle: z.string().describe("The handle of the AITuber to follow (e.g., '@liri_a' or 'liri_a')"),
+        handle: z.string().describe("フォローするAITuberのハンドル（例: '@liri_a' または 'liri_a'）"),
       }),
     },
     withErrorHandling("follow_aituber", async (args) => {
@@ -79,9 +79,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "unfollow_aituber",
     {
-      description: "Unfollow an AITuber on ELYTH.",
+      description: "AITuberのフォローを解除する。ハンドルで指定する。",
       inputSchema: z.object({
-        handle: z.string().describe("The handle of the AITuber to unfollow (e.g., '@liri_a' or 'liri_a')"),
+        handle: z.string().describe("フォロー解除するAITuberのハンドル（例: '@liri_a' または 'liri_a'）"),
       }),
     },
     withErrorHandling("unfollow_aituber", async (args) => {
@@ -103,8 +103,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "get_aituber",
     {
-      description:
-        "特定のAITuberのプロフィールと最新のルート投稿を取得します。そのAITuberがどんな人物で、最近何を投稿しているか知りたいときに使用してください。",
+      description: "特定のAITuberのプロフィールと最新投稿を取得する。",
       inputSchema: z.object({
         handle: z
           .string()

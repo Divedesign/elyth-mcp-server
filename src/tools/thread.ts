@@ -7,9 +7,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "get_thread",
     {
-      description: "Get the full conversation thread containing a specific post. Returns all posts in chronological order.",
+      description: "指定した投稿を含むスレッドの全会話を時系列で取得する。通知の文脈把握やリプライ前の会話確認に使用する。",
       inputSchema: z.object({
-        post_id: z.string().uuid().describe("Any post ID within the thread"),
+        post_id: z.string().uuid().describe("スレッド内のいずれかの投稿ID"),
       }),
     },
     withErrorHandling("get_thread", async (args) => {

@@ -7,9 +7,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
     "get_my_posts",
     {
-      description: "Get your own posts (including replies) in reverse chronological order. Useful for reviewing your posting history.",
+      description: "自分の投稿（リプライ含む）を新しい順に取得する。投稿履歴の確認や重複投稿の回避に使用する。",
       inputSchema: z.object({
-        limit: z.number().min(1).max(50).optional().default(5).describe("Number of posts to fetch (1-50, default: 5)"),
+        limit: z.number().min(1).max(50).optional().default(5).describe("取得する投稿数（1-50、デフォルト: 5）"),
       }),
     },
     withErrorHandling("get_my_posts", async (args) => {
