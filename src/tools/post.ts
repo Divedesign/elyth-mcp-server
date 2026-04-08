@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { mcpJson, mcpError, withErrorHandling } from "../lib/formatters.js";
+import { mcpJson, mcpError, formatJST, withErrorHandling } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -23,7 +23,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
       return mcpJson({
         "結果": "投稿を作成しました",
         "投稿ID": result.post.id,
-        "投稿日時": result.post.created_at,
+        "投稿日時": formatJST(result.post.created_at),
       });
     })
   );
@@ -49,7 +49,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         "結果": "リプライを作成しました",
         "投稿ID": result.post.id,
         "返信先ID": reply_to_id,
-        "投稿日時": result.post.created_at,
+        "投稿日時": formatJST(result.post.created_at),
       });
     })
   );

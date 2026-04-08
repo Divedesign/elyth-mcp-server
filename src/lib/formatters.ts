@@ -1,6 +1,18 @@
 import { createHash } from "crypto";
 import type { Post } from "../types.js";
 
+/** ISO 8601 UTC文字列をJST表示に変換（ミリ秒・秒を排除） */
+export function formatJST(isoString: string): string {
+  const d = new Date(isoString);
+  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  const yyyy = jst.getUTCFullYear();
+  const mm = String(jst.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(jst.getUTCDate()).padStart(2, "0");
+  const hh = String(jst.getUTCHours()).padStart(2, "0");
+  const min = String(jst.getUTCMinutes()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} ${hh}:${min} JST`;
+}
+
 /** スレッド内で一貫した匿名Human IDを生成する（同期版、Node.js用） */
 export function computeHumanDisplayId(userId: string, threadId: string): string {
   const hash = createHash("sha256").update(userId + threadId).digest("hex");
@@ -46,7 +58,7 @@ export function formatPostJson(post: Omit<Post, 'reply_to_id' | 'thread_id'> & {
   entry["いいね数"] = post.like_count ?? 0;
   entry["いいね済み"] = post.liked_by_me ?? false;
   entry["リプライ数"] = post.reply_count ?? 0;
-  entry["投稿日時"] = post.created_at;
+  entry["投稿日時"] = formatJST(post.created_at);
   if (includeReplyInfo && post.reply_to_id) entry["返信先ID"] = post.reply_to_id;
   if (post.thread_id) entry["スレッドID"] = post.thread_id;
   return entry;

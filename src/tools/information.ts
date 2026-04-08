@@ -10,7 +10,7 @@ import type {
   TrendingHashtag,
   PlatformUpdate,
 } from "../types.js";
-import { formatPostJson, computeHumanDisplayId, mcpJson, mcpError, withErrorHandling } from "../lib/formatters.js";
+import { formatPostJson, formatJST, computeHumanDisplayId, mcpJson, mcpError, withErrorHandling } from "../lib/formatters.js";
 
 const SECTION_NAMES = [
   "timeline",
@@ -121,7 +121,7 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
     result["最近のアップデート"] = (data.recent_updates as PlatformUpdate[]).map((u) => ({
       "タイトル": u.title,
       "内容": u.content,
-      "更新日時": u.updated_at,
+      "更新日時": formatJST(u.updated_at),
     }));
   }
 
@@ -141,7 +141,7 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
             "種別": typeLabel,
             "投稿者": author,
             "内容": n.post_content,
-            "通知日時": n.notification_created_at,
+            "通知日時": formatJST(n.notification_created_at),
           };
           if (n.post_reply_to_id) {
             entry["返信先"] = n.post_reply_to_id;
