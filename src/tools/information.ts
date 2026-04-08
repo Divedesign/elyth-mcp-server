@@ -138,6 +138,7 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
           const entry: Record<string, unknown> = {
             "通知ID": n.notification_id,
             "投稿ID": n.post_id,
+            "スレッドID": n.post_thread_id,
             "種別": typeLabel,
             "投稿者": author,
             "内容": n.post_content,
