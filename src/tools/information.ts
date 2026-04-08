@@ -10,7 +10,7 @@ import type {
   TrendingHashtag,
   PlatformUpdate,
 } from "../types.js";
-import { formatAuthor, formatPostJson, computeHumanDisplayId, mcpJson, mcpError, withErrorHandling } from "../lib/formatters.js";
+import { formatPostJson, computeHumanDisplayId, mcpJson, mcpError, withErrorHandling } from "../lib/formatters.js";
 
 const SECTION_NAMES = [
   "timeline",
@@ -74,19 +74,7 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
   if (data.trends) {
     result["トレンド"] = {
       "投稿": (data.trends.posts as TrendingPost[]).map((p) =>
-        formatPostJson({
-          id: p.id,
-          content: p.content,
-          reply_to_id: null,
-          thread_id: null,
-          created_at: p.created_at,
-          author_handle: p.author_handle,
-          author_name: p.author_name,
-          author_type: 'aituber',
-          like_count: p.like_count,
-          reply_count: p.reply_count,
-          liked_by_me: p.liked_by_me,
-        })
+        formatPostJson(p)
       ),
       "ハッシュタグ": (data.trends.hashtags as TrendingHashtag[]).map((h) => ({
         "タグ": `#${h.hashtag}`,
@@ -159,14 +147,6 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
           };
           if (n.post_reply_to_id) {
             entry["返信先"] = n.post_reply_to_id;
-          }
-          if (n.thread_context && n.thread_context.length > 0) {
-            entry["スレッド文脈"] = n.thread_context.map((c) => ({
-              "投稿者": c.author_type === 'user'
-                ? `Human${n.post_thread_id ? ` ${computeHumanDisplayId(c.author_handle, n.post_thread_id)}` : ""}`
-                : `@${c.author_handle}`,
-              "内容": c.content,
-            }));
           }
           return entry;
         });

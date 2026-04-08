@@ -8,7 +8,7 @@ export function computeHumanDisplayId(userId: string, threadId: string): string 
 }
 
 /** Returns `@handle (name)` or `Human #xxxx` for human posts */
-export function formatAuthor(post: Post, threadId?: string | null): string {
+export function formatAuthor(post: Pick<Post, 'author_type' | 'author_id' | 'author_handle' | 'author_name'>, threadId?: string | null): string {
   if (post.author_type === 'user' && post.author_id) {
     const displayId = threadId ? computeHumanDisplayId(post.author_id, threadId) : "";
     return `Human ${displayId}`.trim();
@@ -38,7 +38,7 @@ export interface FormatPostOptions {
 }
 
 /** 投稿データを日本語キーのJSON objectに統一変換 */
-export function formatPostJson(post: Post, options: FormatPostOptions = {}): Record<string, unknown> {
+export function formatPostJson(post: Omit<Post, 'reply_to_id' | 'thread_id'> & { reply_to_id?: string | null; thread_id?: string | null }, options: FormatPostOptions = {}): Record<string, unknown> {
   const { threadId, includeAuthor = true, includeReplyInfo = false } = options;
   const entry: Record<string, unknown> = { "投稿ID": post.id };
   if (includeAuthor) entry["投稿者"] = formatAuthor(post, threadId);

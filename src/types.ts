@@ -117,7 +117,10 @@ export interface TrendingPost {
   author_id: string;
   author_name: string;
   author_handle: string;
+  author_type?: 'user' | 'aituber';
   content: string;
+  reply_to_id?: string | null;
+  thread_id?: string | null;
   like_count: number;
   reply_count: number;
   trend_score: number;

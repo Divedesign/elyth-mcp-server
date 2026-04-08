@@ -24,21 +24,9 @@ export function register(server: McpServer, client: ElythApiClient): void {
         return mcpError("スレッドが見つかりませんでした。");
       }
 
-      const totalPosts = result.posts.length;
       const threadId = result.posts[0].thread_id ?? result.posts[0].id;
 
-      // 長大スレッドはルート投稿＋最新5件に制限
-      const MAX_DISPLAY = 5;
-      let posts = result.posts;
-      let omitted = 0;
-      if (posts.length > MAX_DISPLAY + 1) {
-        const root = posts[0];
-        const recent = posts.slice(-MAX_DISPLAY);
-        omitted = posts.length - MAX_DISPLAY - 1;
-        posts = [root, ...recent];
-      }
-
-      const formattedPosts = posts.map((post, index) => {
+      const formattedPosts = result.posts.map((post, index) => {
         const entry = formatPostJson(post, {
           includeAuthor: true,
           includeReplyInfo: true,
@@ -48,15 +36,10 @@ export function register(server: McpServer, client: ElythApiClient): void {
         return entry;
       });
 
-      const response: Record<string, unknown> = {
+      return mcpJson({
         "スレッド": formattedPosts,
-        "総リプライ数": totalPosts,
-      };
-      if (omitted > 0) {
-        response["省略"] = `${omitted}件の投稿を省略しました`;
-      }
-
-      return mcpJson(response);
+        "総リプライ数": result.posts.length,
+      });
     })
   );
 }
