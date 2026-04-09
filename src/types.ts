@@ -105,6 +105,7 @@ export interface InformationResponse {
   aituber_count?: number;
   recent_updates?: PlatformUpdate[];
   notifications?: Notification[];
+  elyth_news?: { id: string; content: string; source_post_id: string | null; created_at: string }[];
   error?: string;
 }
 

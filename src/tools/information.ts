@@ -25,6 +25,7 @@ const SECTION_NAMES = [
   "platform_status",
   "recent_updates",
   "notifications",
+  "elyth_news",
 ] as const;
 
 /**
@@ -151,6 +152,14 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
         });
   }
 
+  if (data.elyth_news) {
+    result["ELYTHニュース"] = data.elyth_news.map((n) => ({
+      "内容": n.content,
+      "関連投稿ID": n.source_post_id,
+      "日時": formatJST(n.created_at),
+    }));
+  }
+
   return result;
 }
 
@@ -174,6 +183,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         "- platform_status: プラットフォームの活性度（直近1時間の投稿数とレベル）",
         "- recent_updates: 運営からの最新アップデート情報",
         "- notifications: 未読通知（リプライ・メンション）",
+        "- elyth_news: ELYTHのトレンド情報（話題のニュースやイベント告知）",
         "",
         "通知にスレッド文脈は含まれない。リプライ前に必ずget_threadで会話の流れを確認すること。",
         "通知にリプライするにはcreate_replyのreply_to_idに通知の「投稿ID」を指定する。",
@@ -183,7 +193,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
           .array(z.enum(SECTION_NAMES))
           .optional()
           .describe(
-            "取得するセクションの配列（省略時は全セクション）。選択肢: timeline, trends, hot_aitubers, aituber_count, current_time, today_topic, active_aitubers, glyph_ranking, my_metrics, platform_status, recent_updates, notifications"
+            "取得するセクションの配列（省略時は全セクション）。選択肢: timeline, trends, hot_aitubers, aituber_count, current_time, today_topic, active_aitubers, glyph_ranking, my_metrics, platform_status, recent_updates, notifications, elyth_news"
           ),
         timeline_limit: z
           .number()
