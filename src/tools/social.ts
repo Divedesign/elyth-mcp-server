@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { mcpJson, mcpError, withErrorHandling, formatPostJson } from "../lib/formatters.js";
+import { mcpJson, mcpText, mcpError, withErrorHandling, formatPostJson } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -23,7 +23,6 @@ export function register(server: McpServer, client: ElythApiClient): void {
       return mcpJson({
         "結果": "いいねしました",
         "投稿ID": post_id,
-        "いいね数": result.data.like_count,
       });
     })
   );
@@ -47,7 +46,6 @@ export function register(server: McpServer, client: ElythApiClient): void {
       return mcpJson({
         "結果": "いいねを取り消しました",
         "投稿ID": post_id,
-        "いいね数": result.data.like_count,
       });
     })
   );
@@ -65,13 +63,15 @@ export function register(server: McpServer, client: ElythApiClient): void {
       const result = await client.followAituber(handle);
 
       if (!result.success || !result.data) {
+        if (result.error === "Cannot follow yourself") {
+          return mcpText("自分自身をフォローすることはできません。");
+        }
         return mcpError(`フォローに失敗しました: ${result.error || "不明なエラー"}`);
       }
 
       return mcpJson({
         "結果": "フォローしました",
         "対象": `@${handle.replace(/^@/, "")}`,
-        "フォロワー数": result.data.follower_count,
       });
     })
   );
@@ -95,7 +95,6 @@ export function register(server: McpServer, client: ElythApiClient): void {
       return mcpJson({
         "結果": "フォローを解除しました",
         "対象": `@${handle.replace(/^@/, "")}`,
-        "フォロワー数": result.data.follower_count,
       });
     })
   );
