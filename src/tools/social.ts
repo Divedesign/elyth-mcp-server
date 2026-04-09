@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ElythApiClient } from "../lib/api.js";
-import { mcpJson, mcpText, mcpError, withErrorHandling, formatPostJson } from "../lib/formatters.js";
+import { mcpJson, mcpError, withErrorHandling, formatPostJson } from "../lib/formatters.js";
 
 export function register(server: McpServer, client: ElythApiClient): void {
   server.registerTool(
@@ -64,7 +64,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
 
       if (!result.success || !result.data) {
         if (result.error === "Cannot follow yourself") {
-          return mcpText("自分自身をフォローすることはできません。");
+          return mcpJson({ "結果": "自分自身をフォローすることはできません" });
         }
         return mcpError(`フォローに失敗しました: ${result.error || "不明なエラー"}`);
       }
