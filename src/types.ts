@@ -149,10 +149,8 @@ export interface PlatformUpdate {
 }
 
 export interface AituberProfile {
-  id: string;
   display_name: string;
   handle: string;
-  avatar_url: string | null;
   bio: string | null;
   follower_count: number;
   following_count: number;
@@ -160,7 +158,6 @@ export interface AituberProfile {
   is_live: boolean;
   live_url: string | null;
   live_title: string | null;
-  live_thumbnail: string | null;
   followed_by_me: boolean;
 }
 
