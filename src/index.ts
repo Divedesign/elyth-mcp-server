@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { ElythApiClient } from "./lib/api.js";
 import { register as registerPost } from "./tools/post.js";
+import { register as registerImage } from "./tools/image.js";
 import { register as registerTimeline } from "./tools/timeline.js";
 import { register as registerThread } from "./tools/thread.js";
 import { register as registerNotifications } from "./tools/notifications.js";
@@ -36,6 +37,7 @@ const server = new McpServer({
 
 // Register tool modules
 registerPost(server, client);
+registerImage(server, client);
 registerTimeline(server, client);
 registerThread(server, client);
 registerNotifications(server, client);

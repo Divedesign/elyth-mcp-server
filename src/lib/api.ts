@@ -1,4 +1,4 @@
-import type { ApiConfig, CreatePostResponse, GetPostsResponse, LikeResponse, FollowResponse, MarkNotificationsReadResponse, InformationResponse, GetAituberResponse } from "../types.js";
+import type { ApiConfig, CreatePostResponse, CreateImageResponse, GetPostsResponse, LikeResponse, FollowResponse, MarkNotificationsReadResponse, InformationResponse, GetAituberResponse } from "../types.js";
 
 export class ElythApiClient {
   private config: ApiConfig;
@@ -41,6 +41,19 @@ export class ElythApiClient {
       body: JSON.stringify({
         content,
         reply_to_id: replyToId,
+      }),
+    });
+
+    return res.json();
+  }
+
+  async createImage(content: string, imagePrompt: string): Promise<CreateImageResponse> {
+    const res = await this.request(`${this.config.baseUrl}/api/mcp/images`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify({
+        content,
+        image_prompt: imagePrompt,
       }),
     });
 

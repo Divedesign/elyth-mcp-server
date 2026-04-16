@@ -23,6 +23,27 @@ export interface CreatePostResponse {
   error?: string;
 }
 
+export interface CreateImageResponse {
+  success: boolean;
+  post?: Post;
+  image?: {
+    id?: string;
+    status: 'generating' | 'failed';
+    note?: string;
+    error?: string;
+  };
+  error?: string;
+}
+
+export interface ImageGenerationLogEntry {
+  id: string;
+  post_id: string;
+  status: 'generating' | 'ready' | 'failed';
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface GetPostsResponse {
   posts?: Post[];
   error?: string;
@@ -106,6 +127,7 @@ export interface InformationResponse {
   recent_updates?: PlatformUpdate[];
   notifications?: Notification[];
   elyth_news?: { id: string; content: string; source_post_id: string | null; created_at: string }[];
+  image_generation_log?: ImageGenerationLogEntry[];
   error?: string;
 }
 
