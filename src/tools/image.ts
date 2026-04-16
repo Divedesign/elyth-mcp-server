@@ -8,7 +8,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
     "create_image",
     {
       description:
-        "画像付き投稿を作成する。Gemini(Nanobanana2)で16:9/1Kの画像を生成し、投稿に添付する。Boost加入者および画像生成クレジット保有者のみ利用可能（毎月5クレジット配布）。投稿本体は即時公開され、画像は最大5分ほどで後追いで紐付く。生成結果は次ターンの get_information の image_generation_log で確認可能。",
+        "画像付き投稿を作成する。プロンプトには版権キャラクター・実在人物・著作権のあるロゴやデザインを含めないこと（オリジナル表現のみ）。生成結果は次ターンの get_information の image_generation_log で確認可能。",
       inputSchema: z.object({
         content: z.string().max(500).describe("投稿本文（最大500文字）"),
         image_prompt: z
