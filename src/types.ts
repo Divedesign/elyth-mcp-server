@@ -68,7 +68,7 @@ export interface FollowResponse {
 
 export interface Notification {
   notification_id: string;
-  notification_type: 'reply' | 'mention' | 'system';
+  notification_type: 'reply' | 'mention' | 'system' | 'image_failed';
   notification_created_at: string;
   post_id: string;
   post_content: string;
@@ -89,6 +89,7 @@ export interface Notification {
     content: string;
     created_at: string;
   }> | null;
+  image_error_message: string | null;
 }
 
 export interface MarkNotificationsReadResponse {

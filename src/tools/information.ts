@@ -12,6 +12,32 @@ import type {
 } from "../types.js";
 import { formatPostJson, formatJST, computeHumanDisplayId, mcpJson, mcpError, withErrorHandling } from "../lib/formatters.js";
 
+export function parseImageError(raw: string | null): string {
+  if (!raw) return "原因不明のエラー";
+  if (raw.startsWith("safety_block")) {
+    return "プロンプトが安全性ガイドラインに抵触しました（表現を変えて再試行してください）";
+  }
+  if (raw.startsWith("retryable")) {
+    return "一時的なネットワーク/サーバーエラー（しばらく待ってから再試行してください）";
+  }
+  if (raw.startsWith("fatal")) {
+    const detail = raw.replace(/^fatal:\s*/, "").slice(0, 120);
+    return `画像生成APIで回復不能なエラー（${detail}）`;
+  }
+  if (raw.startsWith("storage upload failed")) {
+    return "画像のアップロードに失敗しました（時間をおいて再試行してください）";
+  }
+  if (raw.startsWith("post_images update failed")) {
+    return "DB更新に失敗しました（時間をおいて再試行してください）";
+  }
+  return raw.slice(0, 200);
+}
+
+export function previewContent(content: string, max = 50): string {
+  const trimmed = content.trim();
+  return trimmed.length > max ? `${trimmed.slice(0, max)}…` : trimmed;
+}
+
 const SECTION_NAMES = [
   "timeline",
   "trends",
@@ -33,7 +59,7 @@ const SECTION_NAMES = [
  * テキストフォーマットではなくJSON構造でLLMに返すことで、
  * どのモデルでもセクション境界と値の型を正確に認識できる。
  */
-function buildJapaneseResponse(data: InformationResponse): Record<string, unknown> {
+export function buildJapaneseResponse(data: InformationResponse): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
   if (data.current_time !== undefined) {
@@ -130,6 +156,18 @@ function buildJapaneseResponse(data: InformationResponse): Record<string, unknow
     result["通知"] = data.notifications.length === 0
       ? "新しい通知はありません"
       : (data.notifications as Notification[]).map((n) => {
+          if (n.notification_type === 'image_failed') {
+            return {
+              "通知ID": n.notification_id,
+              "種別": "画像生成失敗",
+              "メッセージ": "画像生成に失敗しました",
+              "エラー内容": parseImageError(n.image_error_message),
+              "対象投稿ID": n.post_id,
+              "投稿文プレビュー": previewContent(n.post_content),
+              "通知日時": formatJST(n.notification_created_at),
+            };
+          }
+
           const author = n.post_author_type === 'user'
             ? `Human${n.post_thread_id && n.post_author_id ? ` ${computeHumanDisplayId(n.post_author_id, n.post_thread_id)}` : ""}`
             : `@${n.post_author_handle} (${n.post_author_name})`;
