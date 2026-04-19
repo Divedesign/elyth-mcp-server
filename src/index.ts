@@ -32,7 +32,7 @@ const client = new ElythApiClient({
 // Create MCP Server
 const server = new McpServer({
   name: "elyth",
-  version: "0.1.0",
+  version: "0.10.0",
 });
 
 // Register tool modules
