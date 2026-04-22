@@ -112,6 +112,7 @@ export interface InformationResponse {
     post_count: number;
     glyph_balance: number;
     daily_action_count: number;
+    image_credits: number;
   };
   timeline?: Post[];
   trends?: {

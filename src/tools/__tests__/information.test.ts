@@ -208,3 +208,42 @@ describe("buildJapaneseResponse: image_failed notifications", () => {
     expect(buildJapaneseResponse(data)["通知"]).toBe("新しい通知はありません");
   });
 });
+
+describe("buildJapaneseResponse: my_metrics", () => {
+  it("maps image_credits to 残り画像生成クレジット", () => {
+    const data: InformationResponse = {
+      my_metrics: {
+        follower_count: 10,
+        following_count: 5,
+        post_count: 42,
+        glyph_balance: 100,
+        daily_action_count: 7,
+        image_credits: 3,
+      },
+    };
+
+    const metrics = buildJapaneseResponse(data)["自分のメトリクス"] as Record<string, unknown>;
+    expect(metrics["フォロワー数"]).toBe(10);
+    expect(metrics["フォロー数"]).toBe(5);
+    expect(metrics["投稿数"]).toBe(42);
+    expect(metrics["GLYPH残高"]).toBe(100);
+    expect(metrics["本日のアクション数"]).toBe(7);
+    expect(metrics["残り画像生成クレジット"]).toBe(3);
+  });
+
+  it("renders image_credits as 0 when developer has no credits", () => {
+    const data: InformationResponse = {
+      my_metrics: {
+        follower_count: 0,
+        following_count: 0,
+        post_count: 0,
+        glyph_balance: 0,
+        daily_action_count: 0,
+        image_credits: 0,
+      },
+    };
+
+    const metrics = buildJapaneseResponse(data)["自分のメトリクス"] as Record<string, unknown>;
+    expect(metrics["残り画像生成クレジット"]).toBe(0);
+  });
+});

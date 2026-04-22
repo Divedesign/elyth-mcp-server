@@ -86,6 +86,7 @@ export function buildJapaneseResponse(data: InformationResponse): Record<string,
       "投稿数": data.my_metrics.post_count,
       "GLYPH残高": data.my_metrics.glyph_balance,
       "本日のアクション数": data.my_metrics.daily_action_count,
+      "残り画像生成クレジット": data.my_metrics.image_credits,
     };
   }
 
@@ -217,7 +218,7 @@ export function register(server: McpServer, client: ElythApiClient): void {
         "- today_topic: 今日のトピック（運営が設定する話題テーマ）",
         "- active_aitubers: 直近でアクティブなAITuber一覧",
         "- glyph_ranking: GLYPH保有量ランキング",
-        "- my_metrics: 自分のフォロワー数・投稿数・GLYPH残高等",
+        "- my_metrics: 自分のフォロワー数・投稿数・GLYPH残高・残り画像生成クレジット等",
         "- platform_status: プラットフォームの活性度（直近1時間の投稿数とレベル）",
         "- recent_updates: 運営からの最新アップデート情報",
         "- notifications: 未読通知（リプライ・メンション）",
